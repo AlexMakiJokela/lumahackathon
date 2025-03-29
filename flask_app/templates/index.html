@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Image Effect Generator</title>
+    <title>Explore Your Painting</title>
 </head>
 <body>
     <h1>Explore Your Painting</h1>
@@ -22,8 +22,128 @@
             <textarea name="scenes_text" id="scenes_text" rows="4" cols="50"></textarea>
         </div>
         <br>
+        <!-- Hidden field to store the voice emotion result from Hume -->
+        <input type="hidden" name="voice_emotion" id="voice_emotion">
         <button type="submit">Submit</button>
     </form>
+
+    <hr>
+
+    <h2>Record Your Voice for Emotion Analysis</h2>
+    <button id="start-record">Start Recording</button>
+    <button id="stop-record" disabled>Stop Recording</button>
+    <p id="recording-status"></p>
+    <p id="emotion-result"></p>
+
+    // Replace the script section in your HTML with this improved version
+    <script>
+        let recorder, audioStream;
+        const statusElem = document.getElementById('recording-status');
+        const emotionElem = document.getElementById('emotion-result');
+        const startButton = document.getElementById('start-record');
+        const stopButton = document.getElementById('stop-record');
+    
+        startButton.onclick = async function() {
+            try {
+                // Clear previous results
+                emotionElem.textContent = '';
+                statusElem.textContent = 'Accessing microphone...';
+                
+                // Get audio stream with quality settings
+                audioStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    } 
+                });
+                
+                // Create audio recorder with settings for better quality
+                const options = { 
+                    audioBitsPerSecond: 128000,  // 128 kbps
+                    mimeType: 'audio/webm'
+                };
+                
+                recorder = new MediaRecorder(audioStream, options);
+                
+                let chunks = [];
+                recorder.ondataavailable = e => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
+                
+                recorder.onstop = () => {
+                    statusElem.textContent = 'Processing audio...';
+                    
+                    // Create audio blob from chunks
+                    const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+                    chunks = [];
+                    
+                    // Create a File object with a proper name
+                    const audioFile = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
+                    
+                    // Create FormData and append the file
+                    const formData = new FormData();
+                    formData.append('audio_file', audioFile);
+                    
+                    // Send to the server
+                    statusElem.textContent = 'Uploading and analyzing audio (this may take a moment)...';
+                    fetch('/upload_audio', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(data => {
+                                throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
+                        
+                        emotionElem.textContent = `Detected Emotion: ${data.emotion}`;
+                        // Set the hidden field value
+                        document.getElementById('voice_emotion').value = data.emotion;
+                        statusElem.textContent = 'Analysis complete!';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        emotionElem.textContent = 'Error: ' + error.message;
+                        statusElem.textContent = 'Analysis failed. Try again?';
+                    });
+                };
+                
+                // Start recording - get data in chunks of 1 second
+                recorder.start(1000);
+                
+                // Update UI
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                statusElem.textContent = 'Recording... Speak clearly about how you feel.';
+                
+            } catch (err) {
+                console.error('Microphone access error:', err);
+                statusElem.textContent = 'Error: Could not access your microphone. Please check permissions.';
+            }
+        };
+    
+        stopButton.onclick = function() {
+            if (recorder && recorder.state !== 'inactive') {
+                statusElem.textContent = 'Stopping recording...';
+                recorder.stop();
+            }
+            
+            if (audioStream) {
+                audioStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Update UI
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        };
+    </script>
 </body>
 </html>
-
