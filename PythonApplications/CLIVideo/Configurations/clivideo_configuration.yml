@@ -1,0 +1,7 @@
+hotkeys:
+  mode_switch: 'c-m'  # Ctrl+M
+
+style:
+  toolbar:
+    mode_text: '#ansiwhite'
+    background: '#ansiblack'
