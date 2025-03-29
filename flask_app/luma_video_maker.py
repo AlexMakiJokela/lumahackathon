@@ -2,7 +2,8 @@ import os
 import time
 from lumaai import LumaAI
 
-
+emotion1="Sadness"
+emotion2="Determination"
 
 def wait_until_generation_finishes(client, start_generation):
     completed = False
@@ -21,12 +22,13 @@ client = LumaAI(auth_token=os.getenv("LUMAAI_API_KEY"))
 
 # Reference image URL and prompts for start and end keyframes
 reference_image_url = "https://www.michaeldivine.com/wp-content/uploads/2021/01/Station-to-Station-1.jpg"
-start_prompt = "draw an office scene in the style of the reference image"
-end_prompt = "draw an airport scene in the style of the reference image"
+reference_image_weight= 0.75
+start_prompt = f"draw a semi-abstract scene depicting profound {emotion1}"
+end_prompt = f"draw a semi-abstract scene depicting profound {emotion2}"
 
 image_ref_object = [{
   "url": reference_image_url,
-  "weight": 0.5
+  "weight": reference_image_weight
 }]
 
 # Generate start keyframe
@@ -40,20 +42,20 @@ end_keyframe_url = wait_until_generation_finishes(client, end_generation)
 # Define the start and end keyframes and prompt
 start_keyframe = {
     "type": "image",
-    "url": reference_image_url
+    "url": start_keyframe_url
 }
 end_keyframe = {
     "type": "image",
     "url": end_keyframe_url
 }
-prompt = "idk bro make it vibe sad"
+video_prompt = f"draw abstract scenes with the feeling shifting from profound {emotion1} to profound {emotion2}"
 
 # Create the video generation
 generation = client.generations.create(
     aspect_ratio="16:9",
     model="ray-2",
     loop=False,
-    prompt=prompt,
+    prompt=video_prompt,
     keyframes={"frame0": start_keyframe, "frame1": end_keyframe}
 )
 
@@ -64,9 +66,14 @@ while not completed:
     completed = True
   elif generation.state == "failed":
     raise RuntimeError(f"Generation failed: {generation.failure_reason}")
-  print("Dreaming")
+  print("Dreaming ur heckin video")
   time.sleep(3)
 
 # Print the URL to view the video
+print(f"Reference image url: {reference_image_url}, weight {reference_image_weight}")
+print(f"Emotional transition: {emotion1} to {emotion2}")
+print(f"Start keyrame prompt: {start_prompt}")
+print(f"End keyrame prompt: {end_prompt}")
+print(f"Video prompt: {video_prompt}")
 print(f"View your video here: {generation.assets.video}")
 
