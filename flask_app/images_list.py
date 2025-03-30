@@ -1,4 +1,6 @@
 import random
+import os
+from luma_video_maker import LumaAI, wait_until_generation_finishes
 
 images_list = [
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/Apsara5-2.jpg",
@@ -10,14 +12,10 @@ images_list = [
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/Im-still-standin-2.jpg",
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/Big-Sky-Mind-web.jpg",
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/determination-1.jpg",
-    "https://www.michaeldivine.com/wp-content/uploads/2021/01/3-Mental-distraction.jpg",
     "https://www.michaeldivine.com/wp-content/uploads/2021/02/Conjunction-of-Form-web-e1612383423367.jpg",
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/Praise-the-Oontsa-Oontsa-1.jpg",
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/tiananmansquare-1.jpg",
-    "https://www.michaeldivine.com/wp-content/uploads/2021/01/Towerofbabel.jpg",
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/birthofastar-sm2.jpg",
-    "https://www.michaeldivine.com/wp-content/uploads/2021/01/Recognition-Compassion-web.jpg",
-    "https://www.michaeldivine.com/wp-content/uploads/2021/10/the-locksmith-2000.jpg",
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/Limits-web.jpg"
 ]
 
@@ -51,3 +49,26 @@ def get_top_image_for_emotion(emotion, images_emotions_dict):
     
     # Randomly select one of the top images if there is a tie
     return random.choice(top_images)
+
+def get_random_image():
+    return random.choice(images_list)
+
+if __name__ == "__main__":
+    for image in images_list:
+        client = LumaAI(auth_token=os.getenv("LUMAAI_API_KEY"))
+
+        # Reference image URL and prompts for start and end keyframes
+        reference_image_weight= 0.95
+        start_prompt = f"draw a semi-abstract scene depicting profound feeling"
+
+        image_ref_object = [{
+        "url": image,
+        "weight": reference_image_weight
+        }]
+        try:
+            # Generate start keyframe
+            start_generation = client.generations.image.create(prompt=start_prompt, image_ref=image_ref_object)
+            start_keyframe_url = wait_until_generation_finishes(client, start_generation)
+            print(image,"SUCCESS")
+        except:
+            print(image,"FAILURE")
