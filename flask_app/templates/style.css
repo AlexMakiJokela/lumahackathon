@@ -1,0 +1,94 @@
+
+body {
+	background:url(bg.jpg) no-repeat;
+	background-size:cover;	
+	color: #fff;
+	display: flex;
+	flex-direction:column;
+	justify-content: center;
+	align-content: center;
+	flex-direction: column;
+	align-items: center;
+	max-width: 900px;
+	text-align: center;
+	margin: auto;
+	height: 100vh;
+}
+.container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	max-width: 700px;
+	text-align: center;
+	margin: auto;
+	height: auto;	
+	padding:20px 50px 50px;
+	background: #FFF;
+	border: 10px solid #469;
+	font-family: sans-serif;
+	border-radius: 40px;
+	box-sizing: border-box;
+	color: #000;
+	box-shadow: 0px 0px 55px 0px rgba(255,255,255,1);
+}
+h1, h2, h3 {
+	
+	font-weight: normal;
+	font-family: "Ubuntu", sans-serif;
+}
+h1 {
+	line-height: 64px;
+	font-size: 36px;
+	margin:0px 10px 20px;
+	border-bottom: #333 solid 1px;
+}
+h2 {
+	margin-top: 0;
+	line-height: 32px;
+	font-size: 24px;
+}
+h3 {
+	margin:20px 0 0;
+	line-height: 20px;
+	font-size: 20px;
+}
+.q {
+	background: #dee;
+	padding: 20px;
+	padding: 20px;
+	border-radius: 40px
+}
+#main-form {
+	display: none
+}
+button:hover {
+	background:  #08b
+}
+
+button:disabled {
+	opacity:.5;
+	background-color: rgba(0,85,119, .5);
+	cursor: not-allowed;
+	color: #fff
+}
+.buttoncontainer {
+	display: flex;
+	flex-direction: row;
+	gap: 5px;
+	width: 100%;
+}
+
+button {
+	margin: auto;
+	padding: 20px;
+	background: #fb0;
+	color: #000;
+	font-size: 20px;
+	border-radius: 40px;
+	border: 0;
+	transition: 200ms linear all;
+	width: 200px !important
+}
+
+
