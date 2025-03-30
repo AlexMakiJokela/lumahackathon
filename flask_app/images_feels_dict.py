@@ -2,20 +2,6 @@
 
 images_feels_dict = {}
 
-images_feels_dict["https://www.michaeldivine.com/wp-content/uploads/2021/01/Apsara5-2.jpg"] = {
-    "Admiration": 0.85, "Adoration": 0.87, "Aesthetic Appreciation": 0.9, "Amusement": 0.62, "Anger": 0.0,
-    "Annoyance": 0.0, "Anxiety": 0.8, "Awe": 0.9, "Awkwardness": 0.2, "Boredom": 0.0,
-    "Calmness": 0.7, "Concentration": 0.8, "Confusion": 0.72, "Contemplation": 0.85, "Contempt": 0.0,
-    "Contentment": 0.8, "Craving": 0.55, "Desire": 0.7, "Determination": 0.75, "Disappointment": 0.12,
-    "Disapproval": 0.05, "Disgust": 0.0, "Distress": 0.1, "Doubt": 0.1, "Ecstasy": 0.9,
-    "Embarrassment": 0.0, "Empathic Pain": 0.8, "Enthusiasm": 0.8, "Entrancement": 0.9, "Envy": 0.0,
-    "Excitement": 0.8, "Fear": 0.75, "Gratitude": 0.85, "Guilt": 0.15, "Horror": 0.1,
-    "Interest": 0.9, "Joy": 0.8, "Love": 0.9, "Nostalgia": 0.65, "Pain": 0.0,
-    "Pride": 0.8, "Realization": 0.85, "Relief": 0.0, "Romance": 0.85, "Sadness": 0.1,
-    "Sarcasm": 0.0, "Satisfaction": 0.7, "Shame": 0.0, "Surprise (negative)": 0.6, "Surprise (positive)": 0.9,
-    "Sympathy": 0.4, "Tiredness": 0.3, "Triumph": 0.8
-}
-
 images_feels_dict["https://www.michaeldivine.com/wp-content/uploads/2021/01/Station-to-Station-1.jpg"] = {
     "Admiration": 0.9, "Adoration": 0.85, "Aesthetic Appreciation": 0.9, "Amusement": 0.2, "Anger": 0.0,
     "Annoyance": 0.0, "Anxiety": 0.0, "Awe": 0.92, "Awkwardness": 0.1, "Boredom": 0.0,

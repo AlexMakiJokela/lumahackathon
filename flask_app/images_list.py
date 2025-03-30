@@ -2,6 +2,7 @@ import random
 import os
 
 images_list = [
+    "https://www.michaeldivine.com/wp-content/uploads/2021/01/Apsara5-2.jpg",
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/Station-to-Station-1.jpg",
     "https://www.michaeldivine.com/wp-content/uploads/2023/01/lullaby-2000-e1675648047927.jpg",
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/Aperture-2.jpg",
@@ -16,6 +17,7 @@ images_list = [
 ]
 
 image_titles = {
+    "https://www.michaeldivine.com/wp-content/uploads/2021/01/Apsara5-2.jpg": "The Apsara & the Dragon #5",
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/Station-to-Station-1.jpg": "Station to Station",
     "https://www.michaeldivine.com/wp-content/uploads/2023/01/lullaby-2000-e1675648047927.jpg": "Lullaby",
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/Aperture-2.jpg": "Aperture",

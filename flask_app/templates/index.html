@@ -1,373 +1,751 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>Voice-Driven Video Generator</title>
-	<link href="style.css" type="text/css" rel="stylesheet" />
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Faculty+Glyphic&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Voice-Driven Video Generator</title>
+    <link href="{{ url_for('static', filename='style.css') }}" type="text/css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Faculty+Glyphic&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <!-- Additional styles for video history formatting and scroll fixing -->
+    <style>
+        html, body {
+            height: 100%;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            position: relative;
+        }
+        body {
+            min-height: 100%;
+            padding-bottom: 50px; /* Add some space at the bottom */
+        }
+        .container1 {
+            min-height: 100vh;
+            height: auto;
+            overflow-y: visible;
+            padding-bottom: 50px;
+        }
+        .video-entry {
+            background: #fff;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 40px;
+            text-align: left;
+            box-shadow: 0px 0px 15px 0px rgba(255,255,255,0.3);
+            overflow: hidden;
+        }
+        .video-entry h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            font-size: 24px;
+        }
+        .video-label {
+            font-weight: bold;
+            color: #4a6fa5;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .image-title {
+            display: inline-block;
+            margin: 5px 0;
+            color: #08b;
+            text-decoration: underline;
+        }
+        .image-title:hover {
+            color: #fb0;
+        }
+        .video-link {
+            display: inline-block;
+            margin: 20px 0 10px;
+            padding: 10px 20px;
+            background: #fb0;
+            color: #000;
+            text-decoration: none;
+            border-radius: 40px;
+            transition: 200ms linear all;
+            text-align: center;
+        }
+        .video-link:hover {
+            background: #08b;
+            color: #fff;
+        }
+        .emotion-transition {
+            background: #dee;
+            padding: 12px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px 0;
+            color: #000; /* Ensure text is black */
+            font-weight: 500;
+        }
+        .prompt-section {
+            margin: 15px 0;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            color: #000; /* Ensure text is black */
+        }
+        #video-history-container {
+            width: 90%;
+            max-width: 700px;
+        }
+        /* Format the initial text block the same way */
+        #text-block-content {
+            text-align: left;
+        }
+        .formatted-text-block {
+            margin-top: 20px;
+        }
+        .formatted-text-block .video-label {
+            margin-top: 15px;
+        }
+        /* Ensure no white text on white background */
+        .prompt-section div,
+        .emotion-section div,
+        .emotion-section span,
+        .prompt-section span {
+            color: #000;
+        }
+        /* Add scroll to top button */
+        #scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(74, 111, 165, 0.8);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            z-index: 100;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        #scroll-top:hover {
+            background: rgba(74, 111, 165, 1);
+        }
+        /* Spinner for loading */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.3);
+            border-radius: 50%;
+            border-top-color: #fb0;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body>
-	<div class="container1">
-	<div class="container">
-		<h3 class="subtitle">The World's Best </h3>
-	<h1>Personal Emotion Imaginator</h1>
-	<form method="post" id="main-form">
-		<!-- Hidden fields to store data -->
-		<input type="hidden" name="voice_emotion" id="voice_emotion">
-		<input type="hidden" name="text_block" id="text_block">
-		<input type="hidden" name="emotion_index" id="emotion_index" value="0">
-		<input type="hidden" name="all_emotions" id="all_emotions" value="[]">
-	</form>
+    <div class="container1">
+        <div class="container">
+            <h3 class="subtitle">The World's Best</h3>
+            <h1>Personal Emotion Imaginator</h1>
+            <form method="post" id="main-form">
+                <!-- Hidden fields to store data -->
+                <input type="hidden" name="voice_emotion" id="voice_emotion">
+                <input type="hidden" name="text_block" id="text_block">
+                <input type="hidden" name="emotion_index" id="emotion_index" value="2">
+                <input type="hidden" name="all_emotions" id="all_emotions" value="[]">
+            </form>
 
-	<div class="recording-section">
-		<h2>Record your voice for emotional analysis</h2>
-		<p class="q"><em>How you feel right now in this moment?</em></p>
-		
-		<div class="buttoncontainer">
-		<button id="start-record">Start Recording</button>
-		<button id="stop-record" disabled>Stop Recording</button>
-		</div>
-		<p><em>Please speak clearly and honestly and <br>
-		I'll make a video for you based on your emotions.</em></p>
-			<p id="recording-status" class="status"></p>
-			<p id="emotion-result" class="emotion-result"></p>
-		</div>
-	</div>
-	
-	<!-- Container for displaying the text block -->
-	<div id="text-block-container" class="text-block" style="display: none;">
-		<h3>Generated Video Description:</h3>
-		<div id="text-block-content"></div>
-		<div id="video-link-container" style="margin-top: 15px; margin-bottom: 15px; display: none;">
-			<a id="video-link" href="#" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #4a6fa5; color: white; text-decoration: none; border-radius: 4px;">View Video</a>
-		</div>
-		<div class="controls">
-			<button id="extend-button" style="display: none;">Extend This Video</button>
-			<button id="reset-button" style="display: none;">Start New Video</button>
-		</div>
-	</div>
-	</div>
-
-	<!-- Container for video history -->
-	<div id="video-history-container" class="video-history" style="display: none;">
-		<h2>Your Video Journey</h2>
-		<div id="video-entries"></div>
-	</div>
-	</div> <!-- container -->
-	<script>
-		let recorder, audioStream;
-		let videoDetails = null;
-		let allEmotions = [];
-		let currentEmotionIndex = 2; // Start at 2 because the first video already uses emotions 0 and 1
-		
-		const statusElem = document.getElementById('recording-status');
-		const emotionElem = document.getElementById('emotion-result');
-		const startButton = document.getElementById('start-record');
-		const stopButton = document.getElementById('stop-record');
-		const textBlockContainer = document.getElementById('text-block-container');
-		const textBlockContent = document.getElementById('text-block-content');
-		const extendButton = document.getElementById('extend-button');
-		const resetButton = document.getElementById('reset-button');
-		const videoHistoryContainer = document.getElementById('video-history-container');
-		const videoEntries = document.getElementById('video-entries');
-		
-		// Initialize video history as empty (don't load from local storage)
-		let videoHistory = [];
-		
-		function displayVideoHistory() {
-			if (videoHistory.length === 0) {
-				videoHistoryContainer.style.display = 'none';
-				return;
-			}
-			
-			// Clear previous entries
-			videoEntries.innerHTML = '';
-			
-			// Add each video entry
-			videoHistory.forEach((entry, index) => {
-				const videoEntry = document.createElement('div');
-				videoEntry.className = 'video-entry';
-				
-				const title = document.createElement('h3');
-				title.textContent = `Video ${index + 1}: ${entry.emotion}`;
-				
-				const description = document.createElement('div');
-				description.innerHTML = formatTextBlock(entry.textBlock);
-				
-				videoEntry.appendChild(title);
-				videoEntry.appendChild(description);
-				videoEntries.appendChild(videoEntry);
-			});
-			
-			videoHistoryContainer.style.display = 'block';
-		}
-		
-		function formatTextBlock(text) {
-			if (!text) return '';
-			
-			// Replace newlines with paragraph breaks
-			let formatted = text.split('\n\n').map(para => `<p>${para}</p>`).join('');
-			
-			// Format any headings (assuming headings might be lines ending with a colon)
-			formatted = formatted.replace(/<p>([^<:]+):<\/p>/g, '<h4>$1:</h4>');
-			
-			// Highlight key terms
-			formatted = formatted.replace(/(emotions?|feelings?|scenes?|transitions?|movements?|colors?|lights?|sounds?)/gi, 
-				'<strong>$1</strong>');
-			
-			return formatted;
-		}
-		
-		// Handle extending the video
-		extendButton.addEventListener('click', function() {
-			// Show "Processing..." status
-			statusElem.textContent = 'Extending video...';
-			
-			// Save current video to history before extending
-			const currentEmotion = document.getElementById('voice_emotion').value;
-			const currentTextBlock = document.getElementById('text_block').value;
-			
-			if (currentEmotion && currentTextBlock) {
-				videoHistory.push({
-					emotion: currentEmotion,
-					textBlock: currentTextBlock
-				});
-				
-				// Update video history display
-				displayVideoHistory();
-			}
-			
-			// Call the extend endpoint
-			fetch('/extend_video', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					previous_emotion: document.getElementById('voice_emotion').value,
-					emotion_index: currentEmotionIndex,
-					all_emotions: allEmotions
-				}),
-			})
-			.then(response => {
-				if (!response.ok) {
-					return response.json().then(data => {
-						throw new Error(data.error || `HTTP error! Status: ${response.status}`);
-					});
-				}
-				return response.json();
-			})
-			.then(data => {
-				if (data.error) {
-					throw new Error(data.error);
-				}
-				
-				// Update current emotion index if provided
-				if (data.current_emotion_index !== undefined) {
-					currentEmotionIndex = data.current_emotion_index;
-					document.getElementById('emotion_index').value = currentEmotionIndex;
-					console.log(`Updated emotion index to: ${currentEmotionIndex}`);
-				}
-				
-				// Display emotion result
-				emotionElem.textContent = `New Emotion: ${data.emotion}`;
-				
-				// Set the hidden field value for emotion
-				document.getElementById('voice_emotion').value = data.emotion;
-				
-				// Display text block if available
-				if (data.text_block) {
-					textBlockContent.innerHTML = formatTextBlock(data.text_block);
-					textBlockContainer.style.display = 'block';
-					
-					// Also set hidden field for form submission
-					document.getElementById('text_block').value = data.text_block;
-				}
-				
-				// Display video link if available
-				if (data.video_url) {
-					const videoLink = document.getElementById('video-link');
-					videoLink.href = data.video_url;
-					document.getElementById('video-link-container').style.display = 'block';
-				}
-				
-				statusElem.textContent = 'Video extended successfully!';
-			})
-			.catch(error => {
-				console.error('Error:', error);
-				emotionElem.textContent = 'Error: ' + error.message;
-				statusElem.textContent = 'Failed to extend video. Try again?';
-			});
-		});
-		
-		// Reset button - start a new video
-		resetButton.addEventListener('click', function() {
-			resetForNewRecording();
-		});
-	
-		startButton.onclick = function() {
-			startRecording();
-		};
-		
-		async function startRecording() {
-			resetForNewRecording();
-			
-			try {
-				// Clear previous results
-				emotionElem.textContent = '';
-				textBlockContainer.style.display = 'none';
-				textBlockContent.textContent = '';
-				extendButton.style.display = 'none';
-				resetButton.style.display = 'none';
-				statusElem.textContent = 'Accessing microphone...';
-				
-				// Get audio stream with quality settings
-				audioStream = await navigator.mediaDevices.getUserMedia({ 
-					audio: {
-						echoCancellation: true,
-						noiseSuppression: true,
-						autoGainControl: true
-					} 
-				});
-				
-				// Create audio recorder with settings for better quality
-				const options = { 
-					audioBitsPerSecond: 128000,  // 128 kbps
-					mimeType: 'audio/webm'
-				};
-				
-				recorder = new MediaRecorder(audioStream, options);
-				
-				let chunks = [];
-				recorder.ondataavailable = e => {
-					if (e.data.size > 0) chunks.push(e.data);
-				};
-				
-				recorder.onstop = () => {
-					processSoundRecording(chunks);
-				};
-				
-				// Start recording - get data in chunks of 1 second
-				recorder.start(1000);
-				
-				// Update UI
-				startButton.disabled = true;
-				stopButton.disabled = false;
-				statusElem.textContent = 'Recording... Speak clearly about how you feel.';
-				
-			} catch (err) {
-				console.error('Microphone access error:', err);
-				statusElem.textContent = 'Error: Could not access your microphone. Please check permissions.';
-			}
-		}
-		
-		function resetForNewRecording() {
-			// Reset emotion index and clear previous data
-			currentEmotionIndex = 2; // Start at 2 because the first video already uses emotions 0 and 1
-			allEmotions = [];
-			document.getElementById('emotion_index').value = "2";
-			document.getElementById('all_emotions').value = "[]";
-			
-			// Clear video history
-			videoHistory = [];
-			videoHistoryContainer.style.display = 'none';
-			videoEntries.innerHTML = '';
-			
-			// Clear UI elements
-			emotionElem.textContent = '';
-			textBlockContainer.style.display = 'none';
-			textBlockContent.textContent = '';
-			extendButton.style.display = 'none';
-			resetButton.style.display = 'none';
-		}
-		
-		function processSoundRecording(chunks) {
-			statusElem.textContent = 'Processing audio...';
-			
-			// Create audio blob from chunks
-			const audioBlob = new Blob(chunks, { type: 'audio/webm' });
-			
-			// Create a File object with a proper name
-			const audioFile = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
-			
-			// Create FormData and append the file
-			const formData = new FormData();
-			formData.append('audio_file', audioFile);
-			
-			// Send to the server
-			statusElem.textContent = 'Uploading and analyzing audio (this may take a moment)...';
-			fetch('/upload_audio', {
-				method: 'POST',
-				body: formData
-			})
-			.then(response => {
-				if (!response.ok) {
-					return response.json().then(data => {
-						throw new Error(data.error || `HTTP error! Status: ${response.status}`);
-					});
-				}
-				return response.json();
-			})
-			.then(data => {
-				if (data.error) {
-					throw new Error(data.error);
-				}
-				
-				// Store all emotions for later use
-				if (data.all_emotions && Array.isArray(data.all_emotions)) {
-					allEmotions = data.all_emotions;
-					document.getElementById('all_emotions').value = JSON.stringify(allEmotions);
-				}
-				
-				// Display emotion result
-				emotionElem.textContent = `Detected Emotion: ${data.emotion}`;
-				
-				// Set the hidden field value for emotion
-				document.getElementById('voice_emotion').value = data.emotion;
-				
-				// Display text block if available
-				if (data.text_block) {
-					textBlockContent.innerHTML = formatTextBlock(data.text_block);
-					textBlockContainer.style.display = 'block';
-					extendButton.style.display = 'inline-block';
-					resetButton.style.display = 'inline-block';
-					
-					// Also set hidden field for form submission
-					document.getElementById('text_block').value = data.text_block;
-				}
-				
-				// Display video link if available
-				if (data.video_url) {
-					const videoLink = document.getElementById('video-link');
-					videoLink.href = data.video_url;
-					document.getElementById('video-link-container').style.display = 'block';
-				}
-				
-				statusElem.textContent = 'Analysis complete!';
-			})
-			.catch(error => {
-				console.error('Error:', error);
-				emotionElem.textContent = 'Error: ' + error.message;
-				statusElem.textContent = 'Analysis failed. Try again?';
-			});
-		}
-	
-		stopButton.onclick = function() {
-			if (recorder && recorder.state !== 'inactive') {
-				statusElem.textContent = 'Stopping recording...';
-				recorder.stop();
-			}
-			
-			if (audioStream) {
-				audioStream.getTracks().forEach(track => track.stop());
-			}
-			
-			// Update UI
-			startButton.disabled = false;
-			stopButton.disabled = true;
-		};
-	</script>
+            <div class="recording-section">
+                <h2>Record your voice for emotional analysis</h2>
+                <p class="q"><em>How do you feel right now in this moment?</em></p>
+                
+                <div class="buttoncontainer">
+                    <button id="start-record">Start Recording</button>
+                    <button id="stop-record" disabled>Stop Recording</button>
+                </div>
+                <p><em>Please speak clearly and honestly and <br>
+                I'll make a video for you based on your emotions.</em></p>
+                <p id="recording-status" class="status"></p>
+                <p id="emotion-result" class="emotion-result"></p>
+            </div>
+            
+            <!-- Container for displaying the text block -->
+            <div id="text-block-container" class="text-block" style="display: none;">
+                <h3>Generated Video Description:</h3>
+                <div id="text-block-content"></div>
+                <div id="video-link-container" style="margin-top: 15px; margin-bottom: 15px; display: none;">
+                    <a id="video-link" href="#" target="_blank" class="video-link">View Video</a>
+                </div>
+                <div class="controls">
+                    <button id="extend-button" style="display: none;">Extend This Video</button>
+                    <button id="reset-button" style="display: none;">Start New Video</button>
+                </div>
+            </div>
+        </div><!-- container -->
+        
+        <!-- Container for video history - moved outside main container but inside container1 -->
+        <div id="video-history-container" class="video-history" style="display: none;">
+            <h1>Your Video Journey</h1>
+            <div id="video-entries"></div>
+        </div>
+    </div><!-- container1 -->
+    
+    <!-- Add scroll to top button -->
+    <button id="scroll-top" title="Go to top">↑</button>
+    
+    <script>
+        let recorder, audioStream;
+        let videoDetails = null;
+        let allEmotions = [];
+        let currentEmotionIndex = 2; // Start at 2 because the first video already uses emotions 0 and 1
+        
+        const statusElem = document.getElementById('recording-status');
+        const emotionElem = document.getElementById('emotion-result');
+        const startButton = document.getElementById('start-record');
+        const stopButton = document.getElementById('stop-record');
+        const textBlockContainer = document.getElementById('text-block-container');
+        const textBlockContent = document.getElementById('text-block-content');
+        const extendButton = document.getElementById('extend-button');
+        const resetButton = document.getElementById('reset-button');
+        const videoHistoryContainer = document.getElementById('video-history-container');
+        const videoEntries = document.getElementById('video-entries');
+        const scrollTopBtn = document.getElementById('scroll-top');
+        const videoLinkContainer = document.getElementById('video-link-container');
+        const videoLink = document.getElementById('video-link');
+        
+        // Initialize video history as empty (don't load from local storage)
+        let videoHistory = [];
+        
+        // Scroll to top button functionality
+        scrollTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // Show/hide scroll button based on scroll position
+        window.addEventListener('scroll', function() {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                scrollTopBtn.style.display = 'block';
+            } else {
+                scrollTopBtn.style.display = 'none';
+            }
+        });
+        
+        function displayVideoHistory() {
+            if (videoHistory.length === 0) {
+                videoHistoryContainer.style.display = 'none';
+                return;
+            }
+            
+            // Clear previous entries
+            videoEntries.innerHTML = '';
+            
+            // Add each video entry
+            videoHistory.forEach((entry, index) => {
+                const videoEntry = document.createElement('div');
+                videoEntry.className = 'video-entry';
+                
+                const title = document.createElement('h3');
+                title.textContent = `Video ${index + 1}: ${entry.emotion}`;
+                
+                const formattedContent = formatEnhancedTextBlock(entry.textBlock, entry.emotion);
+                
+                videoEntry.appendChild(title);
+                videoEntry.innerHTML += formattedContent;
+                videoEntries.appendChild(videoEntry);
+            });
+            
+            videoHistoryContainer.style.display = 'block';
+            
+            // Fix potential layout issues
+            setTimeout(function() {
+                document.body.style.height = 'auto';
+                window.dispatchEvent(new Event('resize'));
+            }, 100);
+        }
+        
+        function formatEnhancedTextBlock(text, emotion) {
+            if (!text) return '';
+            
+            // Extract URLs and titles
+            let imageUrlStart = extractValue(text, "Reference image url start:");
+            let imageUrlEnd = extractValue(text, "Reference image url end:");
+            let imageTitleStart = extractValue(text, "Reference image title start:");
+            let imageTitleEnd = extractValue(text, "Reference image title end:");
+            let videoUrl = extractVideoUrl(text);
+            
+            // Create formatted HTML
+            let formattedHtml = '';
+            
+            // Add emotion section
+            formattedHtml += `<div class="emotion-section">
+                <span class="video-label">Emotion:</span>
+                <div class="emotion-transition">${emotion}</div>
+            </div>`;
+            
+            // Add image references with clickable links
+            if (imageTitleStart && imageUrlStart) {
+                formattedHtml += `<div>
+                    <span class="video-label">Starting Image:</span>
+                    <a href="${imageUrlStart}" target="_blank" class="image-title">${imageTitleStart}</a>
+                </div>`;
+            }
+            
+            if (imageTitleEnd && imageUrlEnd) {
+                formattedHtml += `<div>
+                    <span class="video-label">Ending Image:</span>
+                    <a href="${imageUrlEnd}" target="_blank" class="image-title">${imageTitleEnd}</a>
+                </div>`;
+            }
+            
+            // Add prompts section
+            let startPrompt = extractValue(text, "Start keyframe prompt:");
+            let endPrompt = extractValue(text, "End keyframe prompt:");
+            let videoPrompt = extractValue(text, "Video prompt:");
+            
+            if (startPrompt || endPrompt || videoPrompt) {
+                formattedHtml += `<div class="prompt-section">`;
+                
+                if (startPrompt) {
+                    formattedHtml += `<div><span class="video-label">Start Prompt:</span> ${startPrompt}</div>`;
+                }
+                
+                if (endPrompt) {
+                    formattedHtml += `<div><span class="video-label">End Prompt:</span> ${endPrompt}</div>`;
+                }
+                
+                if (videoPrompt) {
+                    formattedHtml += `<div><span class="video-label">Video Prompt:</span> ${videoPrompt}</div>`;
+                }
+                
+                formattedHtml += `</div>`;
+            }
+            
+            // Add video link
+            if (videoUrl) {
+                formattedHtml += `<div>
+                    <a href="${videoUrl}" target="_blank" class="video-link">View Video</a>
+                </div>`;
+            }
+            
+            return formattedHtml;
+        }
+        
+        function extractValue(text, label) {
+            if (!text || !label) return '';
+            
+            const regex = new RegExp(label + "\\s*(.+?)(?=\\n|$)");
+            const match = text.match(regex);
+            return match ? match[1].trim() : '';
+        }
+        
+        function extractVideoUrl(text) {
+            if (!text) return '';
+            
+            const regex = /https:\/\/storage\.cdn-luma\.com\/[^\s]+\.mp4/;
+            const match = text.match(regex);
+            return match ? match[0] : '';
+        }
+        
+        function formatTextBlock(text) {
+            if (!text) return '';
+            
+            // Extract key information
+            let emotion = '';
+            let imageUrlStart = extractValue(text, "Reference image url start:");
+            let imageUrlEnd = extractValue(text, "Reference image url end:");
+            let imageTitleStart = extractValue(text, "Reference image title start:");
+            let imageTitleEnd = extractValue(text, "Reference image title end:");
+            let startPrompt = extractValue(text, "Start keyframe prompt:");
+            let endPrompt = extractValue(text, "End keyframe prompt:");
+            let videoPrompt = extractValue(text, "Video prompt:");
+            let videoUrl = extractVideoUrl(text);
+            
+            // Find emotion text
+            const emotionMatch = text.match(/transition: (.+?)(?=\n|$)/);
+            if (emotionMatch) {
+                emotion = emotionMatch[1].trim();
+            }
+            
+            // Build formatted HTML similar to the video history format
+            let formatted = '<div class="formatted-text-block">';
+            
+            // Add emotion section if found
+            if (emotion) {
+                formatted += `<div class="emotion-section">
+                    <span class="video-label">Emotion:</span>
+                    <div class="emotion-transition">${emotion}</div>
+                </div>`;
+            }
+            
+            // Add image references with clickable links
+            if (imageTitleStart && imageUrlStart) {
+                formatted += `<div>
+                    <span class="video-label">Starting Image:</span>
+                    <a href="${imageUrlStart}" target="_blank" class="image-title">${imageTitleStart}</a>
+                </div>`;
+            }
+            
+            if (imageTitleEnd && imageUrlEnd) {
+                formatted += `<div>
+                    <span class="video-label">Ending Image:</span>
+                    <a href="${imageUrlEnd}" target="_blank" class="image-title">${imageTitleEnd}</a>
+                </div>`;
+            }
+            
+            // Add prompts section
+            if (startPrompt || endPrompt || videoPrompt) {
+                formatted += `<div class="prompt-section">`;
+                
+                if (startPrompt) {
+                    formatted += `<div><span class="video-label">Start Prompt:</span> ${startPrompt}</div>`;
+                }
+                
+                if (endPrompt) {
+                    formatted += `<div><span class="video-label">End Prompt:</span> ${endPrompt}</div>`;
+                }
+                
+                if (videoPrompt) {
+                    formatted += `<div><span class="video-label">Video Prompt:</span> ${videoPrompt}</div>`;
+                }
+                
+                formatted += `</div>`;
+            }
+            
+            formatted += '</div>';
+            
+            // Extract and immediately show video URL if it exists
+            if (videoUrl) {
+                console.log("Found video URL in text block:", videoUrl);
+                setTimeout(() => {
+                    videoLink.href = videoUrl;
+                    videoLinkContainer.style.display = 'block';
+                }, 100);
+            }
+            
+            return formatted;
+        }
+        
+        // Function to show loading indicator for video
+        function showVideoLoading() {
+            videoLinkContainer.style.display = 'block';
+            videoLink.innerHTML = '<div class="spinner"></div><span class="loading-text">Processing Video...</span>';
+            videoLink.href = '#';
+            videoLink.onclick = function(e) { e.preventDefault(); };
+        }
+        
+        // Function to update video link when it's ready
+        function updateVideoLink(url) {
+            if (!url) return;
+            
+            videoLink.innerHTML = 'View Video';
+            videoLink.href = url;
+            videoLink.onclick = null;
+            videoLinkContainer.style.display = 'block';
+        }
+        
+        // Handle extending the video
+        extendButton.addEventListener('click', function() {
+            // Show "Processing..." status
+            statusElem.textContent = 'Extending video...';
+            
+            // Immediately show video loading indicator
+            showVideoLoading();
+            
+            // Save current video to history before extending
+            const currentEmotion = document.getElementById('voice_emotion').value;
+            const currentTextBlock = document.getElementById('text_block').value;
+            
+            if (currentEmotion && currentTextBlock) {
+                videoHistory.push({
+                    emotion: currentEmotion,
+                    textBlock: currentTextBlock
+                });
+                
+                // Update video history display
+                displayVideoHistory();
+            }
+            
+            // Call the extend endpoint
+            fetch('/extend_video', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    previous_emotion: document.getElementById('voice_emotion').value,
+                    emotion_index: currentEmotionIndex,
+                    all_emotions: allEmotions
+                }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Update current emotion index if provided
+                if (data.current_emotion_index !== undefined) {
+                    currentEmotionIndex = data.current_emotion_index;
+                    document.getElementById('emotion_index').value = currentEmotionIndex;
+                    console.log(`Updated emotion index to: ${currentEmotionIndex}`);
+                }
+                
+                // Display emotion result
+                emotionElem.textContent = `New Emotion: ${data.emotion}`;
+                
+                // Set the hidden field value for emotion
+                document.getElementById('voice_emotion').value = data.emotion;
+                
+                // Display text block if available
+                if (data.text_block) {
+                    textBlockContent.innerHTML = formatTextBlock(data.text_block);
+                    textBlockContainer.style.display = 'block';
+                    
+                    // Also set hidden field for form submission
+                    document.getElementById('text_block').value = data.text_block;
+                }
+                
+                // Display video link if available
+                if (data.video_url) {
+                    console.log("Got video URL from response:", data.video_url);
+                    updateVideoLink(data.video_url);
+                } else {
+                    console.log("No video URL in initial response, will check text block");
+                    // The formatTextBlock function will attempt to extract video URL
+                }
+                
+                statusElem.textContent = 'Video extended successfully!';
+                
+                // Ensure proper scroll functionality after adding new content
+                document.body.style.height = 'auto';
+                window.dispatchEvent(new Event('resize'));
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                emotionElem.textContent = 'Error: ' + error.message;
+                statusElem.textContent = 'Failed to extend video. Try again?';
+                
+                // Reset video link on error
+                videoLink.innerHTML = 'Error Processing Video';
+            });
+        });
+        
+        // Reset button - start a new video
+        resetButton.addEventListener('click', function() {
+            resetForNewRecording();
+        });
+    
+        startButton.onclick = function() {
+            startRecording();
+        };
+        
+        async function startRecording() {
+            resetForNewRecording();
+            
+            try {
+                // Clear previous results
+                emotionElem.textContent = '';
+                textBlockContainer.style.display = 'none';
+                textBlockContent.textContent = '';
+                extendButton.style.display = 'none';
+                resetButton.style.display = 'none';
+                statusElem.textContent = 'Accessing microphone...';
+                
+                // Get audio stream with quality settings
+                audioStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    } 
+                });
+                
+                // Create audio recorder with settings for better quality
+                const options = { 
+                    audioBitsPerSecond: 128000,  // 128 kbps
+                    mimeType: 'audio/webm'
+                };
+                
+                recorder = new MediaRecorder(audioStream, options);
+                
+                let chunks = [];
+                recorder.ondataavailable = e => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
+                
+                recorder.onstop = () => {
+                    processSoundRecording(chunks);
+                };
+                
+                // Start recording - get data in chunks of 1 second
+                recorder.start(1000);
+                
+                // Update UI
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                statusElem.textContent = 'Recording... Speak clearly about how you feel.';
+                
+            } catch (err) {
+                console.error('Microphone access error:', err);
+                statusElem.textContent = 'Error: Could not access your microphone. Please check permissions.';
+            }
+        }
+        
+        function resetForNewRecording() {
+            // Reset emotion index and clear previous data
+            currentEmotionIndex = 2; // Start at 2 because the first video already uses emotions 0 and 1
+            allEmotions = [];
+            document.getElementById('emotion_index').value = "2";
+            document.getElementById('all_emotions').value = "[]";
+            
+            // Clear video history
+            videoHistory = [];
+            videoHistoryContainer.style.display = 'none';
+            videoEntries.innerHTML = '';
+            
+            // Clear UI elements
+            emotionElem.textContent = '';
+            textBlockContainer.style.display = 'none';
+            textBlockContent.textContent = '';
+            extendButton.style.display = 'none';
+            resetButton.style.display = 'none';
+            videoLinkContainer.style.display = 'none';
+            
+            // Reset scroll and layout
+            window.scrollTo(0, 0);
+            document.body.style.height = 'auto';
+        }
+        
+        function processSoundRecording(chunks) {
+            statusElem.textContent = 'Processing audio...';
+            
+            // Immediately show video loading indicator
+            showVideoLoading();
+            
+            // Create audio blob from chunks
+            const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+            
+            // Create a File object with a proper name
+            const audioFile = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
+            
+            // Create FormData and append the file
+            const formData = new FormData();
+            formData.append('audio_file', audioFile);
+            
+            // Send to the server
+            statusElem.textContent = 'Uploading and analyzing audio (this may take a moment)...';
+            fetch('/upload_audio', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Store all emotions for later use
+                if (data.all_emotions && Array.isArray(data.all_emotions)) {
+                    allEmotions = data.all_emotions;
+                    document.getElementById('all_emotions').value = JSON.stringify(allEmotions);
+                }
+                
+                // Display emotion result
+                emotionElem.textContent = `Detected Emotion: ${data.emotion}`;
+                
+                // Set the hidden field value for emotion
+                document.getElementById('voice_emotion').value = data.emotion;
+                
+                // Display text block if available
+                if (data.text_block) {
+                    textBlockContent.innerHTML = formatTextBlock(data.text_block);
+                    textBlockContainer.style.display = 'block';
+                    extendButton.style.display = 'inline-block';
+                    resetButton.style.display = 'inline-block';
+                    
+                    // Also set hidden field for form submission
+                    document.getElementById('text_block').value = data.text_block;
+                }
+                
+                // Display video link if available
+                if (data.video_url) {
+                    console.log("Video URL received:", data.video_url);
+                    updateVideoLink(data.video_url);
+                } else {
+                    // Still check if there's a video URL in the text block
+                    const extractedUrl = extractVideoUrl(data.text_block || "");
+                    if (extractedUrl) {
+                        updateVideoLink(extractedUrl);
+                    }
+                }
+                
+                statusElem.textContent = 'Analysis complete!';
+                
+                // Fix layout after adding content
+                document.body.style.height = 'auto';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                emotionElem.textContent = 'Error: ' + error.message;
+                statusElem.textContent = 'Analysis failed. Try again?';
+                
+                // Hide video link on error
+                videoLinkContainer.style.display = 'none';
+            });
+        }
+    
+        stopButton.onclick = function() {
+            if (recorder && recorder.state !== 'inactive') {
+                statusElem.textContent = 'Stopping recording...';
+                recorder.stop();
+            }
+            
+            if (audioStream) {
+                audioStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Update UI
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        };
+        
+        // Check for browser compatibility and fix any potential scroll issues on load
+        window.addEventListener('load', function() {
+            document.body.style.height = 'auto';
+            
+            // Fix for some browser quirks with fixed positioning
+            if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+                document.body.classList.add('ios-device');
+                document.documentElement.classList.add('ios-device');
+            }
+        });
+    </script>
 </body>
 </html>

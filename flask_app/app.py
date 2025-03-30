@@ -4,6 +4,7 @@ import requests
 import os
 import tempfile
 import uuid
+import traceback
 import json
 from luma_video_maker import make_a_heckin_video, extend_a_heckin_video
 from images_list import get_random_image, get_top_image_for_emotion
@@ -276,7 +277,11 @@ def upload_audio():
                                         'text_block': 'No emotions were detected in your voice. Please try again and speak clearly about how you feel.'
                                     })
                                 except Exception as e:
+                                    stack_trace = traceback.format_exc()
+                                    
+                                    # Print the full stack trace to the console
                                     print(f"Error processing results: {str(e)}")
+                                    print(f"Stack trace:\n{stack_trace}")
                                     return jsonify({'error': f'Error processing results: {str(e)}'}), 500
                             else:
                                 return jsonify({'error': f'Error getting job results: {job_results_response.status_code}'}), 500
