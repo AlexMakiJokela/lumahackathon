@@ -7,6 +7,7 @@ import uuid
 import json
 from luma_video_maker import make_a_heckin_video, extend_a_heckin_video
 from images_list import get_random_image, get_top_image_for_emotion
+from images_feels_dict import images_feels_dict
 
 app = Flask(__name__)
 
@@ -65,7 +66,7 @@ def extend_video():
         next_emotion = last_sorted_emotions[emotion_index]['name']
         
         # Reference image for extending
-        reference_image = get_random_image()
+        reference_image = get_top_image_for_emotion(last_sorted_emotions[emotion_index]['name'], images_feels_dict)
         
         # Call extend_a_heckin_video with the next emotion
         video_details = extend_a_heckin_video(
@@ -236,8 +237,8 @@ def upload_audio():
                                         emotion_name = emotion_name.strip()
                                         
                                         # Get reference images for the video generation
-                                        reference_image_url_start = get_random_image()
-                                        reference_image_url_end = get_random_image()
+                                        reference_image_url_start = get_top_image_for_emotion(sorted_emotions[0]["name"], images_feels_dict)
+                                        reference_image_url_end =get_top_image_for_emotion(sorted_emotions[1]["name"], images_feels_dict)
                                         
                                         # Create a new video
                                         print(f"Creating new video with emotions: {sorted_emotions[0]['name']} and {sorted_emotions[1]['name'] if len(sorted_emotions) > 1 else sorted_emotions[0]['name']}")
