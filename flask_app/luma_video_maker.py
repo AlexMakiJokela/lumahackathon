@@ -44,11 +44,11 @@ def make_a_heckin_video(reference_image_url_start, reference_image_url_end, emot
 
     last_keyframe_image_ref_based_on_first_keyframe= [{
     "url": reference_image_url_end,
-    "weight": 0.95
+    "weight": 0.75
     },{"url": start_keyframe_url,
     "weight": 0.6}]
 
-    transform_first_keyframe_prompt = f"transform the reference image into a scene depicting profound {emotion2}"
+    transform_first_keyframe_prompt = f"transform the reference image into a semi-abstract scene depicting profound {emotion2}"
 
     # Generate end keyframe
     end_generation = client.generations.image.create(prompt=transform_first_keyframe_prompt, image_ref=last_keyframe_image_ref_based_on_first_keyframe)
@@ -63,7 +63,7 @@ def make_a_heckin_video(reference_image_url_start, reference_image_url_end, emot
         "type": "image",
         "url": end_keyframe_url
     }
-    video_prompt = f"draw a smooth, dreamy transition that swirl and evolves from an abstract scene depicting profound {emotion1} to an abstract scene depicting profound {emotion2}, high detail, detail changes over time"
+    video_prompt = f"draw a smooth, dreamy transition that swirl and evolves from a semi-abstract scene depicting profound {emotion1} to a  semi-abstract scene depicting profound {emotion2}, high detail, detail evolves intricately and dynamically over time"
 
     # Create the video generation
     generation = client.generations.create(
@@ -85,7 +85,8 @@ def make_a_heckin_video(reference_image_url_start, reference_image_url_end, emot
         time.sleep(3)
 
     # Print the URL to view the video
-    print(f"Reference image url: {reference_image_url_start}, weight {reference_image_weight}")
+    print(f"Start reference image url: {reference_image_url_start}, weight {reference_image_weight}")
+    print(f"End reference image url: {reference_image_url_end}")
     print(f"Emotional transition: {emotion1} to {emotion2}")
     print(f"Start keyrame prompt: {start_prompt}")
     print(f"End keyrame prompt: {end_prompt}")
@@ -124,17 +125,17 @@ def extend_a_heckin_video(original_video_object,emotion,reference_image_url):
 
     next_keyframe_image_ref_based_on_last_keyframe= [{
     "url": reference_image_url,
-    "weight": 0.8
+    "weight": 0.75
     },{"url": original_video_object["end_keyframe_url"],
-    "weight": 0.5}]
+    "weight": 0.55}]
 
-    transform_to_next_keyframe_prompt = f"transform the reference image into a scene depicting profound {emotion}"
+    transform_to_next_keyframe_prompt = f"transform the reference image into a  semi-abstract scene depicting profound {emotion}"
 
     # Generate end keyframe
     next_generation = client.generations.image.create(prompt=transform_to_next_keyframe_prompt, image_ref=next_keyframe_image_ref_based_on_last_keyframe)
     next_keyframe_url = wait_until_generation_finishes(client, next_generation)
 
-    video_prompt = f"draw a smooth, dreamy transition that swirl and evolves towards an abstract scene depicting profound {emotion}, high detail, detail changes over time"
+    video_prompt = f"draw a smooth, dreamy transition that swirl and evolves towards a  semi-abstract scene depicting profound {emotion}, high detail, detail evolves intricately and dynamically over time"
 
     generation = client.generations.create(
         prompt=video_prompt,

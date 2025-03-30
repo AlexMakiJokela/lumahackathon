@@ -71,7 +71,7 @@ def extend_video():
         video_details = extend_a_heckin_video(
             original_video_object=last_video_details,
             reference_image_url=reference_image,
-            emotion=last_sorted_emotions[emotion_index]
+            emotion=last_sorted_emotions[emotion_index]['name']
         )
         
         # Store the new video details for future extensions
@@ -229,9 +229,9 @@ def upload_audio():
                                         
                                         # Get the top emotions for display
                                         emotion_name = ""
-                                        for x in range(min(3, len(sorted_emotions))):
+                                        for x in range(min(2, len(sorted_emotions))):
                                             top_emotion = sorted_emotions[x]
-                                            emotion_name = emotion_name + " " + top_emotion.get('name', 'unknown')
+                                            emotion_name = emotion_name + " to " + top_emotion.get('name', 'unknown')
                                         
                                         emotion_name = emotion_name.strip()
                                         
