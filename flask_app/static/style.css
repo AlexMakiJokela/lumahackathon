@@ -1,18 +1,21 @@
 
 body {
-	background:url(bg.jpg) no-repeat;
+	background:url(bg.jpg) no-repeat top;
 	background-size:cover;	
 	color: #fff;
+	background-attachment: fixed;
+	max-width: 900px;
+	text-align: center;
+	margin: auto;
+	font-family: "Ubuntu", sans-serif;
+}
+.container1 {
 	display: flex;
 	flex-direction:column;
 	justify-content: center;
 	align-content: center;
-	flex-direction: column;
 	align-items: center;
-	max-width: 900px;
-	text-align: center;
-	margin: auto;
-	height: 100vh;
+	height: 100vh
 }
 .container {
 	display: flex;
@@ -21,12 +24,12 @@ body {
 	justify-content: center;
 	max-width: 700px;
 	text-align: center;
-	margin: auto;
+	margin: 50px;
 	height: auto;	
-	padding:20px 50px 50px;
+	padding:50px 50px 50px;
 	background: #FFF;
-	border: 10px solid #469;
-	font-family: sans-serif;
+	border: 1px solid #469;
+	line-height: 24px;
 	border-radius: 40px;
 	box-sizing: border-box;
 	color: #000;
@@ -40,8 +43,8 @@ h1, h2, h3 {
 h1 {
 	line-height: 64px;
 	font-size: 36px;
-	margin:0px 10px 20px;
-	border-bottom: #333 solid 1px;
+	margin: 0;
+	padding:10px  0
 }
 h2 {
 	margin-top: 0;
@@ -49,9 +52,12 @@ h2 {
 	font-size: 24px;
 }
 h3 {
-	margin:20px 0 0;
 	line-height: 20px;
 	font-size: 20px;
+}
+h3.subtitle {
+	padding: 0;
+	margin: auto auto 0;
 }
 .q {
 	background: #dee;
@@ -75,10 +81,9 @@ button:disabled {
 .buttoncontainer {
 	display: flex;
 	flex-direction: row;
-	gap: 5px;
+	gap: 2%;
 	width: 100%;
 }
-
 button {
 	margin: auto;
 	padding: 20px;
@@ -88,7 +93,62 @@ button {
 	border-radius: 40px;
 	border: 0;
 	transition: 200ms linear all;
-	width: 200px !important
+	width: 49% !important;
+}
+.text-block {
+	padding: 40px;
+	background-color: #dee;
+	border-radius: 40px;
+}
+.text-block h2 {
+	margin: auto;
+	padding:0px 0px  20px;
+	border-bottom: #666 solid 1px;
 }
 
+.text-block h3 {
+	margin: auto;
+	padding:0px 0px  20px;
+}
+
+ul,li {
+	text-align: left;
+	margin: 0;
+	padding:20px 0px;
+	list-style: none
+}
+li {
+	padding: 8px 0px
+}
+.video-history {
+	width: 100%
+}
+.accordion {
+	background-color: #eee;
+	color: #444;
+	cursor: pointer;
+	padding: 18px;
+	width: 100%;
+	border: none;
+	text-align: left;
+	outline: none;
+	font-size: 16px;
+	transition: 0.4s;
+	width: 100%;
+	box-sizing: border-box;
+	border-radius: 40px;
+}
+
+.active, .accordion:hover {
+  background-color: #ccc; 
+}
+
+.panel {
+  padding: 0 18px;
+  display: none;
+  background-color: white;
+  overflow: hidden;
+}
+.video-history {display: block;
+	margin: 40px;}
 
