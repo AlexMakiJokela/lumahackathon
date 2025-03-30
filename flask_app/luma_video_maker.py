@@ -3,6 +3,7 @@ import time
 import random
 from lumaai import LumaAI
 from emotions_list import emotions_list
+from images_list import image_titles
 
 
 emotion1=random.choice(emotions_list)
@@ -97,6 +98,8 @@ def make_a_heckin_video(reference_image_url_start, reference_image_url_end, emot
     video_details = {
         'reference_image_start_url': reference_image_url_start,
         'reference_image_end_url': reference_image_url_end,
+        'reference_image_start_title': image_titles[reference_image_url_start],
+        'reference_image_end_title': image_titles[reference_image_url_end],
         'emotion1': emotion1,
         'emotion2': emotion2,
         'start_prompt': start_prompt,
@@ -106,7 +109,10 @@ def make_a_heckin_video(reference_image_url_start, reference_image_url_end, emot
         'video_prompt': video_prompt,
         'video_url': generation.assets.video,
         'text_block': (
-            f"Reference image url: {reference_image_url_start}, weight {reference_image_weight}\n"
+            f"Reference image url start: {reference_image_url_start}\n"
+            f"Reference image url end: {reference_image_url_end}\n"
+            f"Reference image title start: {image_titles[reference_image_url_start]}\n"
+            f"Reference image title end: {image_titles[reference_image_url_end]}\n"
             f"Emotional transition: {emotion1} to {emotion2}\n"
             f"Start keyframe prompt: {start_prompt}\n"
             f"End keyframe prompt: {end_prompt}\n"
@@ -135,7 +141,7 @@ def extend_a_heckin_video(original_video_object,emotion,reference_image_url):
     next_generation = client.generations.image.create(prompt=transform_to_next_keyframe_prompt, image_ref=next_keyframe_image_ref_based_on_last_keyframe)
     next_keyframe_url = wait_until_generation_finishes(client, next_generation)
 
-    video_prompt = f"draw a smooth, dreamy transition that swirl and evolves towards a  semi-abstract scene depicting profound {emotion}, high detail, detail evolves intricately and dynamically over time"
+    video_prompt = f"draw a smooth, dreamy transition that swirl and evolves towards a semi-abstract scene depicting profound {emotion}, high detail, detail evolves intricately and dynamically over time"
 
     generation = client.generations.create(
         prompt=video_prompt,
@@ -169,15 +175,17 @@ def extend_a_heckin_video(original_video_object,emotion,reference_image_url):
 
     # Building the dictionary
     video_details = {
-        'reference_image_url': reference_image_url_start,
+        'reference_image_url': reference_image_url,
         'reference_image_end_url': reference_image_url_end,
+        'reference_image_end_title': image_titles[reference_image_url],
         'emotion': emotion,
         'end_prompt': transform_to_next_keyframe_prompt,
         'end_keyframe_url': next_keyframe_url,
         'video_prompt': video_prompt,
         'video_url': generation.assets.video,
         'text_block': (
-            f"Reference image url: {reference_image_url_start}\n"
+            f"Reference image url end: {reference_image_url}\n"
+            f"Reference image title end: {image_titles[reference_image_url]}\n"
             f"Emotional transition: {emotion}\n"
             f"End keyframe prompt: {transform_to_next_keyframe_prompt}\n"
             f"Video prompt: {video_prompt}\n"

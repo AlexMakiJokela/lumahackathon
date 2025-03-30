@@ -30,20 +30,6 @@ images_feels_dict["https://www.michaeldivine.com/wp-content/uploads/2021/01/Stat
     "Sympathy": 0.1, "Tiredness": 0.2, "Triumph": 0.8
 }
 
-images_feels_dict["https://www.michaeldivine.com/wp-content/uploads/2021/02/IMG_20200715_101510.jpg"] = {
-    "Admiration": 0.8, "Adoration": 0.75, "Aesthetic Appreciation": 0.9, "Amusement": 0.0, "Anger": 0.0,
-    "Annoyance": 0.05, "Anxiety": 0.1, "Awe": 0.7, "Awkwardness": 0.0, "Boredom": 0.4,
-    "Calmness": 0.8, "Concentration": 0.0, "Confusion": 0.72, "Contemplation": 0.87, "Contempt": 0.0,
-    "Contentment": 0.8, "Craving": 0.0, "Desire": 0.2, "Determination": 0.8, "Disappointment": 0.0,
-    "Disapproval": 0.0, "Disgust": 0.0, "Distress": 0.0, "Doubt": 0.1, "Ecstasy": 0.4,
-    "Embarrassment": 0.0, "Empathic Pain": 0.15, "Enthusiasm": 0.4, "Entrancement": 0.42, "Envy": 0.0,
-    "Excitement": 0.1, "Fear": 0.1, "Gratitude": 0.8, "Guilt": 0.0, "Horror": 0.0,
-    "Interest": 0.77, "Joy": 0.7, "Love": 0.2, "Nostalgia": 0.75, "Pain": 0.0,
-    "Pride": 0.3, "Realization": 0.85, "Relief": 0.75, "Romance": 0.0, "Sadness": 0.0,
-    "Sarcasm": 0.0, "Satisfaction": 0.3, "Shame": 0.0, "Surprise (negative)": 0.1, "Surprise (positive)": 0.1,
-    "Sympathy": 0.0, "Tiredness": 0.14, "Triumph": 0.4
-}
-
 images_feels_dict["https://www.michaeldivine.com/wp-content/uploads/2023/01/lullaby-2000-e1675648047927.jpg"] = {
     "Admiration": 0.85, "Adoration": 0.9, "Aesthetic Appreciation": 0.9, "Amusement": 0.2, "Anger": 0.0,
     "Annoyance": 0.01, "Anxiety": 0.6, "Awe": 0.9, "Awkwardness": 0.0, "Boredom": 0.1,
