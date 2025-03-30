@@ -1,448 +1,369 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Voice-Driven Video Generator</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f9f9f9;
-        }
-        h1, h2, h3 {
-            color: #333;
-        }
-        .recording-section {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .text-block {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #fff;
-            border-radius: 8px;
-            border-left: 4px solid #4a6fa5;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .text-block p {
-            margin: 0.5em 0;
-        }
-        .text-block h3 {
-            margin-top: 0;
-            color: #4a6fa5;
-        }
-        button {
-            background-color: #4a6fa5;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-            margin-right: 10px;
-        }
-        button:hover {
-            background-color: #3a5985;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .status {
-            margin: 10px 0;
-            font-style: italic;
-            color: #666;
-        }
-        .emotion-result {
-            font-weight: bold;
-            color: #4a6fa5;
-        }
-        #extend-button {
-            margin-top: 15px;
-            background-color: #5cb85c;
-        }
-        #extend-button:hover {
-            background-color: #4cae4c;
-        }
-        .video-history {
-            margin-top: 30px;
-        }
-        .video-entry {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .video-entry h3 {
-            margin-top: 0;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-        }
-        .controls {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-        }
-    </style>
+	<meta charset="UTF-8">
+	<title>Voice-Driven Video Generator</title>
+	<link href="style.css" type="text/css" rel="stylesheet" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Faculty+Glyphic&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Voice-Driven Video Generator</h1>
-    <form method="post" id="main-form">
-        <!-- Hidden fields to store data -->
-        <input type="hidden" name="voice_emotion" id="voice_emotion">
-        <input type="hidden" name="text_block" id="text_block">
-        <input type="hidden" name="emotion_index" id="emotion_index" value="0">
-        <input type="hidden" name="all_emotions" id="all_emotions" value="[]">
-    </form>
+	<div class="container">
+	<h1>Emotional Response Imaginator</h1>
+	<form method="post" id="main-form">
+		<!-- Hidden fields to store data -->
+		<input type="hidden" name="voice_emotion" id="voice_emotion">
+		<input type="hidden" name="text_block" id="text_block">
+		<input type="hidden" name="emotion_index" id="emotion_index" value="0">
+		<input type="hidden" name="all_emotions" id="all_emotions" value="[]">
+	</form>
 
-    <div class="recording-section">
-        <h2>Record Your Voice for Emotion Analysis</h2>
-        <p>Speak clearly about how you feel, and we'll generate a video based on your emotions.</p>
-        <button id="start-record">Start Recording</button>
-        <button id="stop-record" disabled>Stop Recording</button>
-        <p id="recording-status" class="status"></p>
-        <p id="emotion-result" class="emotion-result"></p>
-    </div>
-    
-    <!-- Container for displaying the text block -->
-    <div id="text-block-container" class="text-block" style="display: none;">
-        <h3>Generated Video Description:</h3>
-        <div id="text-block-content"></div>
-        <div id="video-link-container" style="margin-top: 15px; margin-bottom: 15px; display: none;">
-            <a id="video-link" href="#" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #4a6fa5; color: white; text-decoration: none; border-radius: 4px;">View Video</a>
-        </div>
-        <div class="controls">
-            <button id="extend-button" style="display: none;">Extend This Video</button>
-            <button id="reset-button" style="display: none;">Start New Video</button>
-        </div>
-    </div>
+	<div class="recording-section">
+		<h2>Record your voice for emotional analysis</h2>
+		<p class="q"<em>How you feel right now in this moment?</em></p>
+		<p>Please speak clearly and honestly and <br>
+			I'll make a video for you based on your emotions.</p>
+		<div class="buttoncontainer">
+		<button id="start-record">Start Recording</button>
+		<button id="stop-record" disabled>Stop Recording</button>
+		</div>
+			<p id="recording-status" class="status"></p>
+			<p id="emotion-result" class="emotion-result"></p>
+		</div>
+	</div>
+	
+	<!-- Container for displaying the text block -->
+	<div id="text-block-container" class="text-block" style="display: none;">
+		<h3>Generated Video Description:</h3>
+		<div id="text-block-content"></div>
+		<div id="video-link-container" style="margin-top: 15px; margin-bottom: 15px; display: none;">
+			<a id="video-link" href="#" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #4a6fa5; color: white; text-decoration: none; border-radius: 4px;">View Video</a>
+		</div>
+		<div class="controls">
+			<button id="extend-button" style="display: none;">Extend This Video</button>
+			<button id="reset-button" style="display: none;">Start New Video</button>
+		</div>
+	</div>
 
-    <!-- Container for video history -->
-    <div id="video-history-container" class="video-history" style="display: none;">
-        <h2>Your Video Journey</h2>
-        <div id="video-entries"></div>
-    </div>
-
-    <script>
-        let recorder, audioStream;
-        let videoDetails = null;
-        let allEmotions = [];
-        let currentEmotionIndex = 2; // Start at 2 because the first video already uses emotions 0 and 1
-        
-        const statusElem = document.getElementById('recording-status');
-        const emotionElem = document.getElementById('emotion-result');
-        const startButton = document.getElementById('start-record');
-        const stopButton = document.getElementById('stop-record');
-        const textBlockContainer = document.getElementById('text-block-container');
-        const textBlockContent = document.getElementById('text-block-content');
-        const extendButton = document.getElementById('extend-button');
-        const resetButton = document.getElementById('reset-button');
-        const videoHistoryContainer = document.getElementById('video-history-container');
-        const videoEntries = document.getElementById('video-entries');
-        
-        // Initialize video history as empty (don't load from local storage)
-        let videoHistory = [];
-        
-        function displayVideoHistory() {
-            if (videoHistory.length === 0) {
-                videoHistoryContainer.style.display = 'none';
-                return;
-            }
-            
-            // Clear previous entries
-            videoEntries.innerHTML = '';
-            
-            // Add each video entry
-            videoHistory.forEach((entry, index) => {
-                const videoEntry = document.createElement('div');
-                videoEntry.className = 'video-entry';
-                
-                const title = document.createElement('h3');
-                title.textContent = `Video ${index + 1}: ${entry.emotion}`;
-                
-                const description = document.createElement('div');
-                description.innerHTML = formatTextBlock(entry.textBlock);
-                
-                videoEntry.appendChild(title);
-                videoEntry.appendChild(description);
-                videoEntries.appendChild(videoEntry);
-            });
-            
-            videoHistoryContainer.style.display = 'block';
-        }
-        
-        function formatTextBlock(text) {
-            if (!text) return '';
-            
-            // Replace newlines with paragraph breaks
-            let formatted = text.split('\n\n').map(para => `<p>${para}</p>`).join('');
-            
-            // Format any headings (assuming headings might be lines ending with a colon)
-            formatted = formatted.replace(/<p>([^<:]+):<\/p>/g, '<h4>$1:</h4>');
-            
-            // Highlight key terms
-            formatted = formatted.replace(/(emotions?|feelings?|scenes?|transitions?|movements?|colors?|lights?|sounds?)/gi, 
-                '<strong>$1</strong>');
-            
-            return formatted;
-        }
-        
-        // Handle extending the video
-        extendButton.addEventListener('click', function() {
-            // Show "Processing..." status
-            statusElem.textContent = 'Extending video...';
-            
-            // Save current video to history before extending
-            const currentEmotion = document.getElementById('voice_emotion').value;
-            const currentTextBlock = document.getElementById('text_block').value;
-            
-            if (currentEmotion && currentTextBlock) {
-                videoHistory.push({
-                    emotion: currentEmotion,
-                    textBlock: currentTextBlock
-                });
-                
-                // Update video history display
-                displayVideoHistory();
-            }
-            
-            // Call the extend endpoint
-            fetch('/extend_video', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    previous_emotion: document.getElementById('voice_emotion').value,
-                    emotion_index: currentEmotionIndex,
-                    all_emotions: allEmotions
-                }),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.error || `HTTP error! Status: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                // Update current emotion index if provided
-                if (data.current_emotion_index !== undefined) {
-                    currentEmotionIndex = data.current_emotion_index;
-                    document.getElementById('emotion_index').value = currentEmotionIndex;
-                    console.log(`Updated emotion index to: ${currentEmotionIndex}`);
-                }
-                
-                // Display emotion result
-                emotionElem.textContent = `New Emotion: ${data.emotion}`;
-                
-                // Set the hidden field value for emotion
-                document.getElementById('voice_emotion').value = data.emotion;
-                
-                // Display text block if available
-                if (data.text_block) {
-                    textBlockContent.innerHTML = formatTextBlock(data.text_block);
-                    textBlockContainer.style.display = 'block';
-                    
-                    // Also set hidden field for form submission
-                    document.getElementById('text_block').value = data.text_block;
-                }
-                
-                // Display video link if available
-                if (data.video_url) {
-                    const videoLink = document.getElementById('video-link');
-                    videoLink.href = data.video_url;
-                    document.getElementById('video-link-container').style.display = 'block';
-                }
-                
-                statusElem.textContent = 'Video extended successfully!';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                emotionElem.textContent = 'Error: ' + error.message;
-                statusElem.textContent = 'Failed to extend video. Try again?';
-            });
-        });
-        
-        // Reset button - start a new video
-        resetButton.addEventListener('click', function() {
-            resetForNewRecording();
-        });
-    
-        startButton.onclick = function() {
-            startRecording();
-        };
-        
-        async function startRecording() {
-            resetForNewRecording();
-            
-            try {
-                // Clear previous results
-                emotionElem.textContent = '';
-                textBlockContainer.style.display = 'none';
-                textBlockContent.textContent = '';
-                extendButton.style.display = 'none';
-                resetButton.style.display = 'none';
-                statusElem.textContent = 'Accessing microphone...';
-                
-                // Get audio stream with quality settings
-                audioStream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true
-                    } 
-                });
-                
-                // Create audio recorder with settings for better quality
-                const options = { 
-                    audioBitsPerSecond: 128000,  // 128 kbps
-                    mimeType: 'audio/webm'
-                };
-                
-                recorder = new MediaRecorder(audioStream, options);
-                
-                let chunks = [];
-                recorder.ondataavailable = e => {
-                    if (e.data.size > 0) chunks.push(e.data);
-                };
-                
-                recorder.onstop = () => {
-                    processSoundRecording(chunks);
-                };
-                
-                // Start recording - get data in chunks of 1 second
-                recorder.start(1000);
-                
-                // Update UI
-                startButton.disabled = true;
-                stopButton.disabled = false;
-                statusElem.textContent = 'Recording... Speak clearly about how you feel.';
-                
-            } catch (err) {
-                console.error('Microphone access error:', err);
-                statusElem.textContent = 'Error: Could not access your microphone. Please check permissions.';
-            }
-        }
-        
-        function resetForNewRecording() {
-            // Reset emotion index and clear previous data
-            currentEmotionIndex = 2; // Start at 2 because the first video already uses emotions 0 and 1
-            allEmotions = [];
-            document.getElementById('emotion_index').value = "2";
-            document.getElementById('all_emotions').value = "[]";
-            
-            // Clear video history
-            videoHistory = [];
-            videoHistoryContainer.style.display = 'none';
-            videoEntries.innerHTML = '';
-            
-            // Clear UI elements
-            emotionElem.textContent = '';
-            textBlockContainer.style.display = 'none';
-            textBlockContent.textContent = '';
-            extendButton.style.display = 'none';
-            resetButton.style.display = 'none';
-        }
-        
-        function processSoundRecording(chunks) {
-            statusElem.textContent = 'Processing audio...';
-            
-            // Create audio blob from chunks
-            const audioBlob = new Blob(chunks, { type: 'audio/webm' });
-            
-            // Create a File object with a proper name
-            const audioFile = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
-            
-            // Create FormData and append the file
-            const formData = new FormData();
-            formData.append('audio_file', audioFile);
-            
-            // Send to the server
-            statusElem.textContent = 'Uploading and analyzing audio (this may take a moment)...';
-            fetch('/upload_audio', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.error || `HTTP error! Status: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                // Store all emotions for later use
-                if (data.all_emotions && Array.isArray(data.all_emotions)) {
-                    allEmotions = data.all_emotions;
-                    document.getElementById('all_emotions').value = JSON.stringify(allEmotions);
-                }
-                
-                // Display emotion result
-                emotionElem.textContent = `Detected Emotion: ${data.emotion}`;
-                
-                // Set the hidden field value for emotion
-                document.getElementById('voice_emotion').value = data.emotion;
-                
-                // Display text block if available
-                if (data.text_block) {
-                    textBlockContent.innerHTML = formatTextBlock(data.text_block);
-                    textBlockContainer.style.display = 'block';
-                    extendButton.style.display = 'inline-block';
-                    resetButton.style.display = 'inline-block';
-                    
-                    // Also set hidden field for form submission
-                    document.getElementById('text_block').value = data.text_block;
-                }
-                
-                // Display video link if available
-                if (data.video_url) {
-                    const videoLink = document.getElementById('video-link');
-                    videoLink.href = data.video_url;
-                    document.getElementById('video-link-container').style.display = 'block';
-                }
-                
-                statusElem.textContent = 'Analysis complete!';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                emotionElem.textContent = 'Error: ' + error.message;
-                statusElem.textContent = 'Analysis failed. Try again?';
-            });
-        }
-    
-        stopButton.onclick = function() {
-            if (recorder && recorder.state !== 'inactive') {
-                statusElem.textContent = 'Stopping recording...';
-                recorder.stop();
-            }
-            
-            if (audioStream) {
-                audioStream.getTracks().forEach(track => track.stop());
-            }
-            
-            // Update UI
-            startButton.disabled = false;
-            stopButton.disabled = true;
-        };
-    </script>
+	<!-- Container for video history -->
+	<div id="video-history-container" class="video-history" style="display: none;">
+		<h2>Your Video Journey</h2>
+		<div id="video-entries"></div>
+	</div>
+	</div> <!-- container -->
+	<script>
+		let recorder, audioStream;
+		let videoDetails = null;
+		let allEmotions = [];
+		let currentEmotionIndex = 2; // Start at 2 because the first video already uses emotions 0 and 1
+		
+		const statusElem = document.getElementById('recording-status');
+		const emotionElem = document.getElementById('emotion-result');
+		const startButton = document.getElementById('start-record');
+		const stopButton = document.getElementById('stop-record');
+		const textBlockContainer = document.getElementById('text-block-container');
+		const textBlockContent = document.getElementById('text-block-content');
+		const extendButton = document.getElementById('extend-button');
+		const resetButton = document.getElementById('reset-button');
+		const videoHistoryContainer = document.getElementById('video-history-container');
+		const videoEntries = document.getElementById('video-entries');
+		
+		// Initialize video history as empty (don't load from local storage)
+		let videoHistory = [];
+		
+		function displayVideoHistory() {
+			if (videoHistory.length === 0) {
+				videoHistoryContainer.style.display = 'none';
+				return;
+			}
+			
+			// Clear previous entries
+			videoEntries.innerHTML = '';
+			
+			// Add each video entry
+			videoHistory.forEach((entry, index) => {
+				const videoEntry = document.createElement('div');
+				videoEntry.className = 'video-entry';
+				
+				const title = document.createElement('h3');
+				title.textContent = `Video ${index + 1}: ${entry.emotion}`;
+				
+				const description = document.createElement('div');
+				description.innerHTML = formatTextBlock(entry.textBlock);
+				
+				videoEntry.appendChild(title);
+				videoEntry.appendChild(description);
+				videoEntries.appendChild(videoEntry);
+			});
+			
+			videoHistoryContainer.style.display = 'block';
+		}
+		
+		function formatTextBlock(text) {
+			if (!text) return '';
+			
+			// Replace newlines with paragraph breaks
+			let formatted = text.split('\n\n').map(para => `<p>${para}</p>`).join('');
+			
+			// Format any headings (assuming headings might be lines ending with a colon)
+			formatted = formatted.replace(/<p>([^<:]+):<\/p>/g, '<h4>$1:</h4>');
+			
+			// Highlight key terms
+			formatted = formatted.replace(/(emotions?|feelings?|scenes?|transitions?|movements?|colors?|lights?|sounds?)/gi, 
+				'<strong>$1</strong>');
+			
+			return formatted;
+		}
+		
+		// Handle extending the video
+		extendButton.addEventListener('click', function() {
+			// Show "Processing..." status
+			statusElem.textContent = 'Extending video...';
+			
+			// Save current video to history before extending
+			const currentEmotion = document.getElementById('voice_emotion').value;
+			const currentTextBlock = document.getElementById('text_block').value;
+			
+			if (currentEmotion && currentTextBlock) {
+				videoHistory.push({
+					emotion: currentEmotion,
+					textBlock: currentTextBlock
+				});
+				
+				// Update video history display
+				displayVideoHistory();
+			}
+			
+			// Call the extend endpoint
+			fetch('/extend_video', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					previous_emotion: document.getElementById('voice_emotion').value,
+					emotion_index: currentEmotionIndex,
+					all_emotions: allEmotions
+				}),
+			})
+			.then(response => {
+				if (!response.ok) {
+					return response.json().then(data => {
+						throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+					});
+				}
+				return response.json();
+			})
+			.then(data => {
+				if (data.error) {
+					throw new Error(data.error);
+				}
+				
+				// Update current emotion index if provided
+				if (data.current_emotion_index !== undefined) {
+					currentEmotionIndex = data.current_emotion_index;
+					document.getElementById('emotion_index').value = currentEmotionIndex;
+					console.log(`Updated emotion index to: ${currentEmotionIndex}`);
+				}
+				
+				// Display emotion result
+				emotionElem.textContent = `New Emotion: ${data.emotion}`;
+				
+				// Set the hidden field value for emotion
+				document.getElementById('voice_emotion').value = data.emotion;
+				
+				// Display text block if available
+				if (data.text_block) {
+					textBlockContent.innerHTML = formatTextBlock(data.text_block);
+					textBlockContainer.style.display = 'block';
+					
+					// Also set hidden field for form submission
+					document.getElementById('text_block').value = data.text_block;
+				}
+				
+				// Display video link if available
+				if (data.video_url) {
+					const videoLink = document.getElementById('video-link');
+					videoLink.href = data.video_url;
+					document.getElementById('video-link-container').style.display = 'block';
+				}
+				
+				statusElem.textContent = 'Video extended successfully!';
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				emotionElem.textContent = 'Error: ' + error.message;
+				statusElem.textContent = 'Failed to extend video. Try again?';
+			});
+		});
+		
+		// Reset button - start a new video
+		resetButton.addEventListener('click', function() {
+			resetForNewRecording();
+		});
+	
+		startButton.onclick = function() {
+			startRecording();
+		};
+		
+		async function startRecording() {
+			resetForNewRecording();
+			
+			try {
+				// Clear previous results
+				emotionElem.textContent = '';
+				textBlockContainer.style.display = 'none';
+				textBlockContent.textContent = '';
+				extendButton.style.display = 'none';
+				resetButton.style.display = 'none';
+				statusElem.textContent = 'Accessing microphone...';
+				
+				// Get audio stream with quality settings
+				audioStream = await navigator.mediaDevices.getUserMedia({ 
+					audio: {
+						echoCancellation: true,
+						noiseSuppression: true,
+						autoGainControl: true
+					} 
+				});
+				
+				// Create audio recorder with settings for better quality
+				const options = { 
+					audioBitsPerSecond: 128000,  // 128 kbps
+					mimeType: 'audio/webm'
+				};
+				
+				recorder = new MediaRecorder(audioStream, options);
+				
+				let chunks = [];
+				recorder.ondataavailable = e => {
+					if (e.data.size > 0) chunks.push(e.data);
+				};
+				
+				recorder.onstop = () => {
+					processSoundRecording(chunks);
+				};
+				
+				// Start recording - get data in chunks of 1 second
+				recorder.start(1000);
+				
+				// Update UI
+				startButton.disabled = true;
+				stopButton.disabled = false;
+				statusElem.textContent = 'Recording... Speak clearly about how you feel.';
+				
+			} catch (err) {
+				console.error('Microphone access error:', err);
+				statusElem.textContent = 'Error: Could not access your microphone. Please check permissions.';
+			}
+		}
+		
+		function resetForNewRecording() {
+			// Reset emotion index and clear previous data
+			currentEmotionIndex = 2; // Start at 2 because the first video already uses emotions 0 and 1
+			allEmotions = [];
+			document.getElementById('emotion_index').value = "2";
+			document.getElementById('all_emotions').value = "[]";
+			
+			// Clear video history
+			videoHistory = [];
+			videoHistoryContainer.style.display = 'none';
+			videoEntries.innerHTML = '';
+			
+			// Clear UI elements
+			emotionElem.textContent = '';
+			textBlockContainer.style.display = 'none';
+			textBlockContent.textContent = '';
+			extendButton.style.display = 'none';
+			resetButton.style.display = 'none';
+		}
+		
+		function processSoundRecording(chunks) {
+			statusElem.textContent = 'Processing audio...';
+			
+			// Create audio blob from chunks
+			const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+			
+			// Create a File object with a proper name
+			const audioFile = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
+			
+			// Create FormData and append the file
+			const formData = new FormData();
+			formData.append('audio_file', audioFile);
+			
+			// Send to the server
+			statusElem.textContent = 'Uploading and analyzing audio (this may take a moment)...';
+			fetch('/upload_audio', {
+				method: 'POST',
+				body: formData
+			})
+			.then(response => {
+				if (!response.ok) {
+					return response.json().then(data => {
+						throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+					});
+				}
+				return response.json();
+			})
+			.then(data => {
+				if (data.error) {
+					throw new Error(data.error);
+				}
+				
+				// Store all emotions for later use
+				if (data.all_emotions && Array.isArray(data.all_emotions)) {
+					allEmotions = data.all_emotions;
+					document.getElementById('all_emotions').value = JSON.stringify(allEmotions);
+				}
+				
+				// Display emotion result
+				emotionElem.textContent = `Detected Emotion: ${data.emotion}`;
+				
+				// Set the hidden field value for emotion
+				document.getElementById('voice_emotion').value = data.emotion;
+				
+				// Display text block if available
+				if (data.text_block) {
+					textBlockContent.innerHTML = formatTextBlock(data.text_block);
+					textBlockContainer.style.display = 'block';
+					extendButton.style.display = 'inline-block';
+					resetButton.style.display = 'inline-block';
+					
+					// Also set hidden field for form submission
+					document.getElementById('text_block').value = data.text_block;
+				}
+				
+				// Display video link if available
+				if (data.video_url) {
+					const videoLink = document.getElementById('video-link');
+					videoLink.href = data.video_url;
+					document.getElementById('video-link-container').style.display = 'block';
+				}
+				
+				statusElem.textContent = 'Analysis complete!';
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				emotionElem.textContent = 'Error: ' + error.message;
+				statusElem.textContent = 'Analysis failed. Try again?';
+			});
+		}
+	
+		stopButton.onclick = function() {
+			if (recorder && recorder.state !== 'inactive') {
+				statusElem.textContent = 'Stopping recording...';
+				recorder.stop();
+			}
+			
+			if (audioStream) {
+				audioStream.getTracks().forEach(track => track.stop());
+			}
+			
+			// Update UI
+			startButton.disabled = false;
+			stopButton.disabled = true;
+		};
+	</script>
 </body>
 </html>
