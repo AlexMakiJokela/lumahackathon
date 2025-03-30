@@ -1,3 +1,5 @@
+import random
+
 images_list = [
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/Apsara5-2.jpg",
     "https://www.michaeldivine.com/wp-content/uploads/2021/01/Station-to-Station-1.jpg",
@@ -35,3 +37,17 @@ images_emotions_dict["https://www.michaeldivine.com/wp-content/uploads/2021/01/S
     "Sarcasm": 0.00, "Satisfaction": 0.59, "Shame": 0.00, "Surprise (negative)": 0.00, "Surprise (positive)": 0.21,
     "Sympathy": 0.00, "Tiredness": 0.00, "Triumph": 0.00
 }
+
+
+def get_top_image_for_emotion(emotion, images_emotions_dict):
+    # Create a dictionary to store the maximum score for each URL
+    scores = {url: emotions.get(emotion, 0) for url, emotions in images_emotions_dict.items()}
+    
+    # Find the highest score
+    max_score = max(scores.values())
+    
+    # Filter the URLs that have the highest score
+    top_images = [url for url, score in scores.items() if score == max_score]
+    
+    # Randomly select one of the top images if there is a tie
+    return random.choice(top_images)
