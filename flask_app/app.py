@@ -1,50 +1,109 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import time
 import requests
-import gzip
 import os
 import tempfile
 import uuid
+import json
+from luma_video_maker import make_a_heckin_video, extend_a_heckin_video
 
 app = Flask(__name__)
 
 # You'll need to set your Hume API key in environment variables for security
 HUME_API_KEY = os.environ.get('HUME_API_KEY', "Tk7gEavEeErKMOlXMrmfZz2NAY4x3BofC0VlIWtw3G0GXmQA")
 
-@app.route('/', methods=['GET', 'POST'])
+# Global variable to store the last set of sorted emotions
+last_sorted_emotions = []
+last_video_details = None
+current_emotion_index = 2  # Start at index 2 since the first video uses emotions 0 and 1
+
+@app.route('/', methods=['GET'])
 def index():
-    if request.method == 'POST':
-        image_url = request.form.get('image_url')
-        effects_text = request.form.get('effects_text')
-        scenes_text = request.form.get('scenes_text')
-        voice_emotion = request.form.get('voice_emotion')
-        
-        # Here is where you would process the inputs.
-        # Simulating processing delay:
-        time.sleep(3)  # Simulate a long generation process
-        
-        # After processing, redirect to the output page.
-        return redirect(url_for('output',
-                                image_url=image_url,
-                                effects_text=effects_text,
-                                scenes_text=scenes_text,
-                                voice_emotion=voice_emotion))
     return render_template('index.html')
 
 @app.route('/output')
 def output():
-    image_url = request.args.get('image_url')
-    effects_text = request.args.get('effects_text')
-    scenes_text = request.args.get('scenes_text')
-    voice_emotion = request.args.get('voice_emotion')
-    return render_template('output.html',
-                          image_url=image_url,
-                          effects_text=effects_text,
-                          scenes_text=scenes_text,
-                          voice_emotion=voice_emotion)
+    video_history = request.args.get('video_history', '[]')
+    
+    try:
+        # Parse video history
+        video_history = json.loads(video_history)
+    except json.JSONDecodeError:
+        video_history = []
+    
+    return render_template('output.html', video_history=video_history)
+
+@app.route('/extend_video', methods=['POST'])
+def extend_video():
+    """Endpoint to extend a video without requiring a new voice recording"""
+    global last_sorted_emotions, last_video_details, current_emotion_index
+    
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
+        previous_emotion = data.get('previous_emotion')
+        emotion_index = int(data.get('emotion_index', current_emotion_index))
+        
+        if not previous_emotion:
+            return jsonify({'error': 'Previous emotion is required'}), 400
+            
+        # Use the stored emotions from last recording
+        if not last_sorted_emotions:
+            return jsonify({'error': 'No emotions available. Please record your voice first.'}), 400
+        
+        # Use the next emotion in the list
+        if emotion_index >= len(last_sorted_emotions):
+            # If we've used all emotions, wrap around to the beginning
+            emotion_index = emotion_index % len(last_sorted_emotions)
+        
+        # Log the emotion index and emotion being used
+        print(f"Extending with emotion index: {emotion_index}, emotion: {last_sorted_emotions[emotion_index]['name']}")
+        
+        next_emotion = last_sorted_emotions[emotion_index]['name']
+        
+        # Reference image for extending
+        reference_image = "https://www.michaeldivine.com/wp-content/uploads/2021/02/IMG_20200715_101510.jpg"
+        
+        # Call extend_a_heckin_video with the next emotion
+        video_details = extend_a_heckin_video(
+            original_video_object=last_video_details,
+            reference_image_url=reference_image,
+            emotion=last_sorted_emotions[emotion_index]
+        )
+        
+        # Store the new video details for future extensions
+        last_video_details = video_details
+        
+        # Increment the emotion index for the next extension
+        current_emotion_index = emotion_index + 1
+        
+        # Extract and format text_block
+        text_block = video_details.get("text_block", "No text block available")
+        formatted_text = format_text_block(text_block)
+        
+        # Get video URL if available
+        video_url = video_details.get("video_url", "")
+        
+        return jsonify({
+            'emotion': next_emotion,
+            'text_block': formatted_text,
+            'video_url': video_url,
+            'current_emotion_index': current_emotion_index
+        })
+        
+    except Exception as e:
+        print(f"Error extending video: {str(e)}")
+        return jsonify({'error': f'Error extending video: {str(e)}'}), 500
 
 @app.route('/upload_audio', methods=['POST'])
 def upload_audio():
+    global last_sorted_emotions, last_video_details, current_emotion_index
+    
+    # Reset the emotion index since we're starting a new recording
+    current_emotion_index = 2  # Start at 2 because the first video uses emotions 0 and 1
+    
     # Check if API key is set
     if not HUME_API_KEY:
         return jsonify({'error': 'Hume API key is not configured. Please set the HUME_API_KEY environment variable.'}), 500
@@ -69,7 +128,7 @@ def upload_audio():
     audio_file.save(audio_path)
     print(f"Audio saved to: {audio_path}")
     
-    # Create a zip file if needed (you might not need this step if your API accepts WAV directly)
+    # Create a zip file for API submission
     zip_filename = f"HumeAI_artifacts_{file_id}.zip"
     zip_path = os.path.join(temp_dir, zip_filename)
     
@@ -81,16 +140,13 @@ def upload_audio():
     print(f"Zip file created at: {zip_path}")
     
     try:
-        # Make the API request exactly as in the example
+        # Make the API request
         print("Making request to Hume API...")
         
-        # Fix: Don't manually set Content-Type for multipart/form-data
-        # The requests library will set it automatically with the correct boundary
         response = requests.post(
             "https://api.hume.ai/v0/batch/jobs",
             headers={
                 "X-Hume-Api-Key": HUME_API_KEY
-                # Remove the Content-Type header - requests will set it automatically
             },
             files=[
                 ('file', (zip_filename, open(zip_path, 'rb')))
@@ -98,7 +154,6 @@ def upload_audio():
         )
         
         print(f"Hume API Response Status: {response.status_code}")
-        print(f"Hume API Response Headers: {response.headers}")
         print(f"Hume API Response: {response.text}")
         
         # Check for success
@@ -111,7 +166,7 @@ def upload_audio():
                 # Poll for job status
                 job_status_url = f"https://api.hume.ai/v0/batch/jobs/{job_id}"
                 job_status = "IN_PROGRESS"
-                max_retries = 15  # Increased for longer processing time
+                max_retries = 15
                 retries = 0
                 
                 while job_status in ["IN_PROGRESS", "PENDING", "QUEUED"] and retries < max_retries:
@@ -131,7 +186,6 @@ def upload_audio():
                             job_status = job_status_data.get('status')
                             
                         print(f"Job status: {job_status}")
-                        print(f"Full job status data: {job_status_data}")
                         
                         # If job is complete, get the results
                         if job_status == "COMPLETED" or job_status == "SUCCESS":
@@ -143,41 +197,9 @@ def upload_audio():
                             
                             if job_results_response.status_code == 200:
                                 results_data = job_results_response.json()
-                                print(f"Job results: {results_data}")
                                 
-                                # Process results to extract emotion
-                                # This is simplified - adjust based on actual response structure
                                 try:
-                                    # Print the structure to understand the format
-                                    print("Results data structure:", results_data)
-                                    
-                                    # More flexible extraction of emotion data
-                                    # First try to extract based on expected format
-                                    if 'predictions' in results_data:
-                                        predictions = results_data.get('predictions', [])
-                                        if predictions and len(predictions) > 0:
-                                            # Try to find prosody predictions
-                                            for prediction in predictions:
-                                                if isinstance(prediction, dict) and 'prosody' in prediction:
-                                                    emotions = prediction['prosody'].get('emotions', [])
-                                                    if emotions and len(emotions) > 0:
-                                                        # Sort emotions by score
-                                                        sorted_emotions = sorted(emotions, key=lambda x: x.get('score', 0), reverse=True)
-                                                        top_emotion = sorted_emotions[0]
-                                                        emotion_name = top_emotion.get('name', 'unknown')
-                                                        return jsonify({'emotion': emotion_name})
-                                    
-                                    # Alternative formats to try
-                                    # Directly try to find emotions data
-                                    if 'prosody' in results_data:
-                                        emotions = results_data['prosody'].get('emotions', [])
-                                        if emotions and len(emotions) > 0:
-                                            sorted_emotions = sorted(emotions, key=lambda x: x.get('score', 0), reverse=True)
-                                            top_emotion = sorted_emotions[0]
-                                            emotion_name = top_emotion.get('name', 'unknown')
-                                            return jsonify({'emotion': emotion_name})
-                                    
-                                    # Fallback - search for any 'emotions' key in the response
+                                    # Extract emotions from results
                                     def find_emotions(data):
                                         if isinstance(data, dict):
                                             if 'emotions' in data and isinstance(data['emotions'], list) and len(data['emotions']) > 0:
@@ -195,15 +217,62 @@ def upload_audio():
                                     
                                     emotions = find_emotions(results_data)
                                     if emotions:
+                                        # Sort emotions by score
                                         sorted_emotions = sorted(emotions, key=lambda x: x.get('score', 0), reverse=True)
-                                        emotion_name=""
-                                        for x in range(0,3):
+                                        
+                                        # Save the sorted emotions for later use
+                                        last_sorted_emotions = sorted_emotions
+                                        
+                                        # Log all detected emotions
+                                        print(f"All detected emotions: {[e.get('name') for e in sorted_emotions]}")
+                                        
+                                        # Get the top emotions for display
+                                        emotion_name = ""
+                                        for x in range(min(3, len(sorted_emotions))):
                                             top_emotion = sorted_emotions[x]
                                             emotion_name = emotion_name + " " + top_emotion.get('name', 'unknown')
-                                        return jsonify({'emotion': emotion_name})
+                                        
+                                        emotion_name = emotion_name.strip()
+                                        
+                                        # Get reference images for the video generation
+                                        reference_image_url_start = "https://www.michaeldivine.com/wp-content/uploads/2021/01/Apsara5-2.jpg"
+                                        reference_image_url_end = "https://www.michaeldivine.com/wp-content/uploads/2021/01/Station-to-Station-1.jpg"
+                                        
+                                        # Create a new video
+                                        print(f"Creating new video with emotions: {sorted_emotions[0]['name']} and {sorted_emotions[1]['name'] if len(sorted_emotions) > 1 else sorted_emotions[0]['name']}")
+                                        video_details = make_a_heckin_video(
+                                            reference_image_url_start=reference_image_url_start,
+                                            reference_image_url_end=reference_image_url_end,
+                                            emotion1=sorted_emotions[0]["name"],
+                                            emotion2=sorted_emotions[1]["name"] if len(sorted_emotions) > 1 else sorted_emotions[0]["name"]
+                                        )
+                                        
+                                        # Save video details for future extensions
+                                        last_video_details = video_details
+                                        
+                                        # Extract text_block from video_details
+                                        text_block = video_details.get("text_block", "No text block available")
+                                        
+                                        # Get video URL if available
+                                        video_url = video_details.get("video_url", "")
+                                        
+                                        # Format text_block for better readability
+                                        formatted_text = format_text_block(text_block)
+                                        
+                                        # Return both the emotion and the text_block, along with all emotions detected
+                                        return jsonify({
+                                            'emotion': emotion_name, 
+                                            'text_block': formatted_text,
+                                            'video_url': video_url,
+                                            'all_emotions': [e.get('name') for e in sorted_emotions],
+                                            'current_emotion_index': current_emotion_index
+                                        })
                                     
                                     # Default if no emotions found
-                                    return jsonify({'emotion': 'neutral'})
+                                    return jsonify({
+                                        'emotion': 'neutral',
+                                        'text_block': 'No emotions were detected in your voice. Please try again and speak clearly about how you feel.'
+                                    })
                                 except Exception as e:
                                     print(f"Error processing results: {str(e)}")
                                     return jsonify({'error': f'Error processing results: {str(e)}'}), 500
@@ -218,7 +287,11 @@ def upload_audio():
                     # If we hit max retries but the job is still in progress, return a temporary emotion
                     if job_status == "IN_PROGRESS":
                         print("Job still in progress but returning provisional result")
-                        return jsonify({'emotion': 'neutral', 'note': 'Analysis still in progress'})
+                        return jsonify({
+                            'emotion': 'neutral', 
+                            'text_block': 'Analysis still in progress. Please wait a moment and try again.',
+                            'note': 'Analysis still in progress'
+                        })
                     else:
                         return jsonify({'error': 'Job took too long to complete'}), 500
                 
@@ -242,6 +315,24 @@ def upload_audio():
                 os.remove(zip_path)
         except Exception as cleanup_error:
             print(f"Error cleaning up files: {str(cleanup_error)}")
+
+def format_text_block(text):
+    """Format the text block for better readability"""
+    if not text:
+        return "No description available."
+    
+    # Ensure proper paragraph breaks
+    formatted_text = text.replace('\n\n', '\n').replace('\n\n\n', '\n\n')
+    
+    # Add section titles if not present
+    if "Scene Description:" not in formatted_text:
+        sections = formatted_text.split('\n\n')
+        if len(sections) >= 3:
+            formatted_text = "Video Overview:\n" + sections[0] + "\n\n"
+            formatted_text += "Scene Description:\n" + sections[1] + "\n\n"
+            formatted_text += "Emotional Journey:\n" + '\n\n'.join(sections[2:])
+    
+    return formatted_text
 
 if __name__ == '__main__':
     app.run(debug=True)
