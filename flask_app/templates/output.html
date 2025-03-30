@@ -1,213 +1,98 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Your Video Journey</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        h1, h2, h3 {
-            color: #333;
-        }
-        .container {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .video-journey {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .video-segment {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #4a6fa5;
-        }
-        .video-segment h3 {
-            margin-top: 0;
-            color: #4a6fa5;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-        }
-        .emotion-tag {
-            display: inline-block;
-            background-color: #e9f0f8;
-            color: #4a6fa5;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.9em;
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-        .description {
-            margin-top: 15px;
-        }
-        .description p {
-            margin: 0.5em 0;
-        }
-        .description strong {
-            color: #4a6fa5;
-        }
-        .navigation {
-            margin-top: 30px;
-            display: flex;
-            justify-content: space-between;
-        }
-        button, .button {
-            background-color: #4a6fa5;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            text-decoration: none;
-            display: inline-block;
-            transition: background-color 0.3s;
-        }
-        button:hover, .button:hover {
-            background-color: #3a5985;
-        }
-        .timeline {
-            margin: 40px 0;
-            position: relative;
-            padding-left: 30px;
-        }
-        .timeline::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 15px;
-            width: 2px;
-            background-color: #4a6fa5;
-        }
-        .milestone {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .milestone::before {
-            content: '';
-            position: absolute;
-            left: -30px;
-            top: 15px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: #4a6fa5;
-            border: 2px solid #fff;
-        }
-        .section-title {
-            font-weight: bold;
-            color: #555;
-            margin-top: 15px;
-            margin-bottom: 5px;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        .empty-state p {
-            margin-bottom: 20px;
-        }
-    </style>
+	<meta charset="UTF-8">
+	<title>Voice-Driven Video Generator</title>
+	<link href="style.css" type="text/css" rel="stylesheet" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Faculty+Glyphic&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+	
 </head>
 <body>
-    <div class="container">
-        <h1>Your Emotional Video Journey</h1>
-        
-        {% if video_history and video_history|length > 0 %}
-            <div class="timeline">
-                {% for video in video_history %}
-                    <div class="milestone">
-                        <div class="video-segment">
-                            <h3>Chapter {{ loop.index }}: {{ video.emotion }}</h3>
-                            
-                            <div class="emotion-tags">
-                                {% for emotion in video.emotion.split() %}
-                                    <span class="emotion-tag">{{ emotion }}</span>
-                                {% endfor %}
-                            </div>
-                            
-                            <div class="description">
-                                {% if video.text_block %}
-                                    {% set lines = video.text_block.split('\n\n') %}
-                                    
-                                    {% for line in lines %}
-                                        {% if ":" in line and loop.index <= 3 %}
-                                            {% set parts = line.split(':', 1) %}
-                                            <div class="section-title">{{ parts[0] }}:</div>
-                                            <p>{{ parts[1] | replace('\n', '<br>') | safe }}</p>
-                                        {% else %}
-                                            <p>{{ line | replace('\n', '<br>') | safe }}</p>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    <p>No description available for this segment.</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty-state">
-                <p>You haven't created any videos yet.</p>
-                <a href="/" class="button">Start Creating</a>
-            </div>
-        {% endif %}
-        
-        <div class="navigation">
-            <a href="/" class="button">Create Another Video</a>
-            
-            {% if video_history and video_history|length > 0 %}
-                <button id="download-journey" onclick="downloadJourney()">Download Journey</button>
-            {% endif %}
-        </div>
-    </div>
-    
-    <script>
-        function downloadJourney() {
-            // Create text content for download
-            const videoHistory = {{ video_history|tojson }};
-            let content = "YOUR EMOTIONAL VIDEO JOURNEY\n\n";
-            
-            videoHistory.forEach((video, index) => {
-                content += `CHAPTER ${index + 1}: ${video.emotion}\n`;
-                content += "=".repeat(20) + "\n\n";
-                
-                if (video.text_block) {
-                    content += video.text_block + "\n\n";
-                } else {
-                    content += "No description available for this segment.\n\n";
-                }
-                
-                content += "-".repeat(50) + "\n\n";
-            });
-            
-            // Create download link
-            const element = document.createElement('a');
-            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
-            element.setAttribute('download', 'emotional_video_journey.txt');
-            
-            element.style.display = 'none';
-            document.body.appendChild(element);
-            element.click();
-            document.body.removeChild(element);
-        }
-    </script>
+	<div class="container">
+		<h3 class="subtitle">The World's Best </h3>
+	<h1>Personal Emotion Imaginator</h1>
+		
+		{% if video_history and video_history|length > 0 %}
+			<div class="timeline">
+				{% for video in video_history %}
+					<div class="milestone">
+						<div class="video-segment">
+							<h3>Chapter {{ loop.index }}: {{ video.emotion }}</h3>
+							
+							<div class="emotion-tags">
+								{% for emotion in video.emotion.split() %}
+									<span class="emotion-tag">{{ emotion }}</span>
+								{% endfor %}
+							</div>
+							
+							<div class="description">
+								{% if video.text_block %}
+									{% set lines = video.text_block.split('\n\n') %}
+									
+									{% for line in lines %}
+										{% if ":" in line and loop.index <= 3 %}
+											{% set parts = line.split(':', 1) %}
+											<div class="section-title">{{ parts[0] }}:</div>
+											<p>{{ parts[1] | replace('\n', '<br>') | safe }}</p>
+										{% else %}
+											<p>{{ line | replace('\n', '<br>') | safe }}</p>
+										{% endif %}
+									{% endfor %}
+								{% else %}
+									<p>No description available for this segment.</p>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+		{% else %}
+			<div class="empty-state">
+				<p>You haven't created any videos yet.</p>
+				<a href="/" class="button">Start Creating</a>
+			</div>
+		{% endif %}
+		
+		<div class="navigation">
+			<a href="/" class="button">Create Another Video</a>
+			
+			{% if video_history and video_history|length > 0 %}
+				<button id="download-journey" onclick="downloadJourney()">Download Journey</button>
+			{% endif %}
+		</div>
+	</div>
+	
+	<script>
+		function downloadJourney() {
+			// Create text content for download
+			const videoHistory = {{ video_history|tojson }};
+			let content = "YOUR EMOTIONAL VIDEO JOURNEY\n\n";
+			
+			videoHistory.forEach((video, index) => {
+				content += `CHAPTER ${index + 1}: ${video.emotion}\n`;
+				content += "=".repeat(20) + "\n\n";
+				
+				if (video.text_block) {
+					content += video.text_block + "\n\n";
+				} else {
+					content += "No description available for this segment.\n\n";
+				}
+				
+				content += "-".repeat(50) + "\n\n";
+			});
+			
+			// Create download link
+			const element = document.createElement('a');
+			element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+			element.setAttribute('download', 'emotional_video_journey.txt');
+			
+			element.style.display = 'none';
+			document.body.appendChild(element);
+			element.click();
+			document.body.removeChild(element);
+		}
+	</script>
 </body>
 </html>
